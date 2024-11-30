@@ -1,0 +1,25 @@
+[package]
+name = "rsui"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+
+[features]
+stdweb = ["instant/stdweb"]
+wasm-bindgen = ["instant/wasm-bindgen"]
+
+[dependencies]
+gloo-console = "0.3"
+gloo-worker = "0.5"
+
+[dependencies.yew]
+version = "0.21"
+features = ["csr"]
+
+[dependencies.web-sys]
+version = "0.3"
+features = ["HtmlInputElement", "console"]
+
+[dependencies.instant]
+version = "0.1"
+features = ["wasm-bindgen"]

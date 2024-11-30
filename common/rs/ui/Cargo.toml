@@ -1,0 +1,18 @@
+[package]
+name = "ui"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+stdweb = ["instant/stdweb"]
+wasm-bindgen = ["instant/wasm-bindgen"]
+
+[dependencies.web-sys]
+version = "0.3"
+features = ["HtmlInputElement"]
+
+[dependencies.yew]
+version = "0.21"
+
+[dependencies.instant]
+version = "0.1"
