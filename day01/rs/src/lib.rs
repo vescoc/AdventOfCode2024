@@ -8,15 +8,43 @@ lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
 
+struct CountHashMap<K, T>(HashMap<K, T>);
+
+impl<K, T> Default for CountHashMap<K, T> {
+    fn default() -> Self {
+        Self(HashMap::with_capacity(1024))
+    }
+}
+
+impl std::iter::Extend<u32> for CountHashMap<u32, u32> {
+    fn extend<T: IntoIterator<Item = u32>>(&mut self, i: T) {
+        for value in i {
+            *self.0.entry(value).or_default() += 1;
+        }
+    }
+}
+
+impl<K, T> std::ops::Deref for CountHashMap<K, T> {
+    type Target = HashMap<K, T>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 /// # Panics
 pub fn solve_1(input: &str) -> u32 {
-    let (mut line1, mut line2) = (Vec::with_capacity(1024), Vec::with_capacity(1024));
-    for line in input.lines() {
-        let mut parts = line.split_whitespace();
+    let (mut line1, mut line2) = input
+        .lines()
+        .map(|line| {
+            let mut parts = line.split_whitespace();
 
-        line1.push(parts.next().unwrap().parse::<u32>().unwrap());
-        line2.push(parts.next().unwrap().parse::<u32>().unwrap());
-    }
+            (
+                parts.next().unwrap().parse::<u32>().unwrap(),
+                parts.next().unwrap().parse::<u32>().unwrap(),
+            )
+        })
+        .collect::<(Vec<_>, Vec<_>)>();
 
     line1.sort_unstable();
     line2.sort_unstable();
@@ -30,19 +58,17 @@ pub fn solve_1(input: &str) -> u32 {
 
 /// # Panics
 pub fn solve_2(input: &str) -> u32 {
-    let (mut line1, mut line2) = (
-        Vec::with_capacity(1024),
-        HashMap::<u32, u32>::with_capacity(1024),
-    );
-    for line in input.lines() {
-        let mut parts = line.split_whitespace();
+    let (line1, line2) = input
+        .lines()
+        .map(|line| {
+            let mut parts = line.split_whitespace();
 
-        line1.push(parts.next().unwrap().parse::<u32>().unwrap());
-
-        *line2
-            .entry(parts.next().unwrap().parse::<u32>().unwrap())
-            .or_default() += 1;
-    }
+            (
+                parts.next().unwrap().parse::<u32>().unwrap(),
+                parts.next().unwrap().parse::<u32>().unwrap(),
+            )
+        })
+        .collect::<(Vec<_>, CountHashMap<_, _>)>();
 
     line1
         .into_iter()
