@@ -14,39 +14,39 @@ pub fn solve_1(input: &str) -> u32 {
     for line in input.lines() {
         let mut parts = line.split_whitespace();
 
-        line1.push(parts.next().unwrap().parse::<i32>().unwrap());
-        line2.push(parts.next().unwrap().parse::<i32>().unwrap());
+        line1.push(parts.next().unwrap().parse::<u32>().unwrap());
+        line2.push(parts.next().unwrap().parse::<u32>().unwrap());
     }
 
     line1.sort_unstable();
     line2.sort_unstable();
 
     line1
-        .iter()
-        .zip(line2.iter())
-        .map(|(a, &b)| a.abs_diff(b))
+        .into_iter()
+        .zip(line2)
+        .map(|(a, b)| a.abs_diff(b))
         .sum()
 }
 
 /// # Panics
-pub fn solve_2(input: &str) -> i32 {
+pub fn solve_2(input: &str) -> u32 {
     let (mut line1, mut line2) = (
         Vec::with_capacity(1024),
-        HashMap::<i32, i32>::with_capacity(1024),
+        HashMap::<u32, u32>::with_capacity(1024),
     );
     for line in input.lines() {
         let mut parts = line.split_whitespace();
 
-        line1.push(parts.next().unwrap().parse::<i32>().unwrap());
+        line1.push(parts.next().unwrap().parse::<u32>().unwrap());
 
         *line2
-            .entry(parts.next().unwrap().parse::<i32>().unwrap())
+            .entry(parts.next().unwrap().parse::<u32>().unwrap())
             .or_default() += 1;
     }
 
     line1
-        .iter()
-        .map(|id| id * line2.get(id).copied().unwrap_or_default())
+        .into_iter()
+        .map(|id| id * line2.get(&id).copied().unwrap_or_default())
         .sum()
 }
 
@@ -54,7 +54,7 @@ pub fn part_1() -> u32 {
     solve_1(&INPUT)
 }
 
-pub fn part_2() -> i32 {
+pub fn part_2() -> u32 {
     solve_2(&INPUT)
 }
 
