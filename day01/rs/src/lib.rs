@@ -1,6 +1,6 @@
 #![allow(clippy::must_use_candidate)]
 
-use std::collections::HashMap;
+use hashbrown::HashMap;
 
 use lazy_static::lazy_static;
 
