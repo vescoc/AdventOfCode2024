@@ -4,7 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+heapless = "0.8.0"
+itertools = "0.13.0"
 lazy_static = "1.4"
+
+[target.'cfg(not(target_family = "wasm"))'.dependencies]
+rayon = "1.10.0"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
@@ -12,3 +17,6 @@ criterion = { version = "0.5", features = ["html_reports"] }
 [[bench]]
 name = "bench"
 harness = false
+
+[lints.clippy]
+pedantic = "deny"
