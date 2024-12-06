@@ -28,21 +28,21 @@ impl<const SIZE: usize, T, K: Fn(&T) -> usize> BitSet<SIZE, T, K> {
     #[allow(clippy::needless_pass_by_value)]
     fn insert(&mut self, idx: T) {
         let idx = (self.key)(&idx);
-        let (i, b) = (idx / mem::size_of::<usize>(), idx % mem::size_of::<usize>());
+        let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
 
         self.data[i] |= 1 << b;
     }
 
     fn contains(&self, idx: &T) -> bool {
         let idx = (self.key)(idx);
-        let (i, b) = (idx / mem::size_of::<usize>(), idx % mem::size_of::<usize>());
+        let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
 
         self.data[i] & (1 << b) != 0
     }
 
     fn remove(&mut self, idx: &T) {
         let idx = (self.key)(idx);
-        let (i, b) = (idx / mem::size_of::<usize>(), idx % mem::size_of::<usize>());
+        let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
 
         self.data[i] &= !(1 << b);
     }
@@ -77,7 +77,7 @@ pub fn solve_1(input: &str) -> usize {
     );
 
     let mut visited =
-        BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
+        BitSet::<{ 256 * 256 / mem::size_of::<u128>()}, _, _>::new(|(r, c)| r * width + c);
 
     let mut facing = 0;
     loop {
@@ -171,13 +171,13 @@ pub fn solve_2(input: &str) -> usize {
     let mut facing = 0;
 
     let mut visited =
-        BitSet::<{ 256 * 256 / mem::size_of::<usize>() }, _, _>::new(|(r, c)| r * width + c);
+        BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
     let mut visited_pd =
-        BitSet::<{ 256 * 256 * 5 / mem::size_of::<usize>() }, _, _>::new(|((r, c), f)| {
+        BitSet::<{ 256 * 256 * 5 / mem::size_of::<u128>() }, _, _>::new(|((r, c), f)| {
             r * width + c + f * width * height
         });
     let mut obstructions =
-        BitSet::<{ 256 * 256 / mem::size_of::<usize>() }, _, _>::new(|(r, c)| r * width + c);
+        BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
     
     'outher: loop {
         visited.insert(current_position);
