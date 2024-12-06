@@ -290,6 +290,7 @@ dependencies = [
  "aoc",
  "criterion",
  "lazy_static",
+ "rayon",
 ]
 
 [[package]]

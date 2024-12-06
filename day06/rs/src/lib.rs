@@ -4,20 +4,24 @@
 
 use core::mem;
 
+#[cfg(not(target_family = "wasm"))]
+use rayon::prelude::*;
+
 use lazy_static::lazy_static;
 
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
 
-struct BitSet<const SIZE: usize, T, K: Fn(&T) -> usize> {
+#[derive(Copy, Clone)]
+pub struct BitSet<const SIZE: usize, T, K: Fn(&T) -> usize> {
     data: [usize; SIZE],
     key: K,
     _marker: core::marker::PhantomData<T>,
 }
 
 impl<const SIZE: usize, T, K: Fn(&T) -> usize> BitSet<SIZE, T, K> {
-    const fn new(key: K) -> Self {
+    pub const fn new(key: K) -> Self {
         Self {
             data: [0; SIZE],
             key,
@@ -26,41 +30,44 @@ impl<const SIZE: usize, T, K: Fn(&T) -> usize> BitSet<SIZE, T, K> {
     }
 
     #[allow(clippy::needless_pass_by_value)]
-    fn insert(&mut self, idx: T) {
+    pub fn insert(&mut self, idx: T) -> bool {
         let idx = (self.key)(&idx);
         let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
 
-        self.data[i] |= 1 << b;
+        let data = &mut self.data[i];
+
+        let mask = 1 << b;
+
+        let result = *data & mask != 0;
+
+        *data |= mask;
+
+        result
     }
 
-    fn contains(&self, idx: &T) -> bool {
+    pub fn contains(&self, idx: &T) -> bool {
         let idx = (self.key)(idx);
         let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
 
         self.data[i] & (1 << b) != 0
     }
 
-    fn remove(&mut self, idx: &T) {
+    pub fn remove(&mut self, idx: &T) {
         let idx = (self.key)(idx);
         let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
 
         self.data[i] &= !(1 << b);
     }
 
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.data
             .iter()
             .map(|value| value.count_ones() as usize)
             .sum()
     }
-}
 
-impl<const SIZE: usize, T, K> BitSet<SIZE, T, K>
-where
-    K: Fn(&T) -> usize + Copy,
-{
-    fn key(&self) -> K {
-        self.key
+    pub fn is_empty(&self) -> bool {
+        self.data.iter().all(|&value| value == 0)
     }
 }
 
@@ -77,85 +84,86 @@ pub fn solve_1(input: &str) -> usize {
     );
 
     let mut visited =
-        BitSet::<{ 256 * 256 / mem::size_of::<u128>()}, _, _>::new(|(r, c)| r * width + c);
+        BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
 
     let mut facing = 0;
     loop {
         visited.insert(current_position);
+        if current_position.0 == 0
+            || current_position.1 == 0
+            || current_position.0 == width - 1
+            || current_position.1 == height - 1
+        {
+            return visited.len();
+        }
 
-        for (next_facing, (dr, dc)) in [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        (facing, current_position) = [(-1, 0), (0, 1), (1, 0), (0, -1)]
             .into_iter()
-            .cycle()
             .enumerate()
+            .cycle()
             .skip(facing)
             .take(4)
-        {
-            match (
-                current_position.0.checked_add_signed(dr),
-                current_position.1.checked_add_signed(dc),
-            ) {
-                (Some(r), Some(c)) if r < height && c < width => {
-                    if map[r * (width + 1) + c] == b'#' {
-                        continue;
-                    }
-                    current_position = (r, c);
-                    facing = next_facing;
-                    break;
+            .find_map(|(facing, (dr, dc))| {
+                let (r, c) = (
+                    current_position.0.checked_add_signed(dr).unwrap(),
+                    current_position.1.checked_add_signed(dc).unwrap(),
+                );
+
+                if map[r * (width + 1) + c] == b'#' {
+                    None
+                } else {
+                    Some((facing, (r, c)))
                 }
-                _ => return visited.len(),
-            }
-        }
+            })
+            .unwrap();
     }
 }
 
 fn is_cycle<const SIZE: usize, K>(
     map: &[u8],
     (height, width): (usize, usize),
-    current_visited: &BitSet<SIZE, ((usize, usize), usize), K>,
+    mut visited: BitSet<SIZE, ((usize, usize), usize), K>,
     (mut r, mut c): (usize, usize),
     mut facing: usize,
     obstruction: (usize, usize),
 ) -> bool
 where
-    K: Fn(&((usize, usize), usize)) -> usize + Copy,
+    K: Fn(&((usize, usize), usize)) -> usize,
 {
-    let mut visited = BitSet::<SIZE, ((usize, usize), usize), K>::new(current_visited.key());
-    'outher: loop {
-        if visited.contains(&((r, c), facing)) || current_visited.contains(&((r, c), facing)) {
+    loop {
+        if visited.insert(((r, c), facing)) {
             return true;
         }
 
-        visited.insert(((r, c), facing));
+        if r == 0 || c == 0 || r == width - 1 || c == height - 1 {
+            return false;
+        }
 
-        for (next_facing, (dr, dc)) in [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        (facing, (r, c)) = [(-1, 0), (0, 1), (1, 0), (0, -1)]
             .into_iter()
             .enumerate()
             .cycle()
             .skip(facing)
             .take(4)
-        {
-            match (r.checked_add_signed(dr), c.checked_add_signed(dc)) {
-                (Some(nr), Some(nc)) if nr < height && nc < width => {
-                    if map[nr * (width + 1) + nc] == b'#' || (nr, nc) == obstruction {
-                        continue;
-                    }
+            .find_map(|(facing, (dr, dc))| {
+                let (r, c) = (
+                    r.checked_add_signed(dr).unwrap(),
+                    c.checked_add_signed(dc).unwrap(),
+                );
 
-                    (r, c) = (nr, nc);
-
-                    facing = next_facing;
-
-                    continue 'outher;
+                if map[r * (width + 1) + c] == b'#' || (r, c) == obstruction {
+                    None
+                } else {
+                    Some((facing, (r, c)))
                 }
-                _ => return false,
-            }
-        }
-
-        unreachable!();
+            })
+            .unwrap();
     }
 }
 
 /// # Panics
-pub fn solve_2(input: &str) -> usize {
+#[cfg(not(target_family = "wasm"))]
+pub fn solve_2_par(input: &str) -> usize {
     let map = input.as_bytes();
     let width = map.iter().position(|&c| c == b'\n').unwrap();
     let height = (map.len() + 1) / (width + 1);
@@ -166,9 +174,89 @@ pub fn solve_2(input: &str) -> usize {
         current_position % (width + 1),
     );
 
-    let invalid_position = (current_position.0 - 1, current_position.1);
+    let mut visited =
+        BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
+    let mut visited_pd =
+        BitSet::<{ 256 * 256 * 5 / mem::size_of::<u128>() }, _, _>::new(|((r, c), f)| {
+            r * width + c + f * width * height
+        });
 
     let mut facing = 0;
+    core::iter::from_fn(|| loop {
+        if current_position.0 == 0
+            || current_position.1 == 0
+            || current_position.0 == width - 1
+            || current_position.1 == height - 1
+        {
+            return None;
+        }
+
+        visited.insert(current_position);
+        visited_pd.insert((current_position, facing));
+
+        let (next_facing, next_position) = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+            .into_iter()
+            .enumerate()
+            .cycle()
+            .skip(facing)
+            .take(4)
+            .find_map(|(facing, (dr, dc))| {
+                let (r, c) = (
+                    current_position.0.checked_add_signed(dr).unwrap(),
+                    current_position.1.checked_add_signed(dc).unwrap(),
+                );
+
+                if map[r * (width + 1) + c] == b'#' {
+                    None
+                } else {
+                    Some((facing, (r, c)))
+                }
+            })
+            .unwrap();
+
+        let result = if visited.contains(&next_position) {
+            None
+        } else {
+            Some((
+                visited_pd,
+                current_position,
+                (next_facing + 1) % 4,
+                next_position,
+            ))
+        };
+
+        (facing, current_position) = (next_facing, next_position);
+
+        if result.is_some() {
+            return result;
+        }
+    })
+    .fuse()
+    .par_bridge()
+    .filter(|(visited, position, facing, obstruction)| {
+        is_cycle(
+            map,
+            (height, width),
+            *visited,
+            *position,
+            *facing,
+            *obstruction,
+        )
+    })
+    .count()
+}
+
+/// # Panics
+pub fn solve_2_sync(input: &str) -> usize {
+    let map = input.as_bytes();
+    let width = map.iter().position(|&c| c == b'\n').unwrap();
+    let height = (map.len() + 1) / (width + 1);
+
+    let current_position = map.iter().position(|&c| c == b'^').unwrap();
+    let mut current_position = (
+        current_position / (width + 1),
+        current_position % (width + 1),
+    );
 
     let mut visited =
         BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
@@ -176,60 +264,59 @@ pub fn solve_2(input: &str) -> usize {
         BitSet::<{ 256 * 256 * 5 / mem::size_of::<u128>() }, _, _>::new(|((r, c), f)| {
             r * width + c + f * width * height
         });
-    let mut obstructions =
-        BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
-    
-    'outher: loop {
+
+    let mut count = 0;
+    let mut facing = 0;
+    loop {
+        if current_position.0 == 0
+            || current_position.1 == 0
+            || current_position.0 == width - 1
+            || current_position.1 == height - 1
+        {
+            return count;
+        }
+
         visited.insert(current_position);
         visited_pd.insert((current_position, facing));
 
-        for (next_facing, (dr, dc)) in [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        let (next_facing, next_position) = [(-1, 0), (0, 1), (1, 0), (0, -1)]
             .into_iter()
             .enumerate()
             .cycle()
             .skip(facing)
             .take(4)
+            .find_map(|(facing, (dr, dc))| {
+                let (r, c) = (
+                    current_position.0.checked_add_signed(dr).unwrap(),
+                    current_position.1.checked_add_signed(dc).unwrap(),
+                );
+
+                if map[r * (width + 1) + c] == b'#' {
+                    None
+                } else {
+                    Some((facing, (r, c)))
+                }
+            })
+            .unwrap();
+
+        if !visited.contains(&next_position)
+            && is_cycle(
+                map,
+                (height, width),
+                visited_pd,
+                current_position,
+                (next_facing + 1) % 4,
+                next_position,
+            )
         {
-            match (
-                current_position.0.checked_add_signed(dr),
-                current_position.1.checked_add_signed(dc),
-            ) {
-                (Some(r), Some(c)) if r < height && c < width => {
-                    if map[r * (width + 1) + c] == b'#' {
-                        continue;
-                    }
-
-                    if !obstructions.contains(&(r, c))
-                        && !visited.contains(&(r, c))
-                        && is_cycle(
-                            map,
-                            (height, width),
-                            &visited_pd,
-                            current_position,
-                            (next_facing + 1) % 4,
-                            (r, c),
-                        )
-                    {
-                        obstructions.insert((r, c));
-                    }
-
-                    current_position = (r, c);
-
-                    facing = next_facing;
-
-                    continue 'outher;
-                }
-                _ => {
-                    obstructions.remove(&invalid_position);
-
-                    return obstructions.len();
-                }
-            }
+            count += 1;
         }
 
-        unreachable!();
+        (facing, current_position) = (next_facing, next_position);
     }
 }
+
+pub use solve_2_sync as solve_2;
 
 pub fn part_1() -> usize {
     solve_1(&INPUT)
@@ -262,7 +349,12 @@ mod tests {
     }
 
     #[test]
-    fn same_results_2() {
-        assert_eq!(solve_2(&INPUT), 6);
+    fn same_results_2_sync() {
+        assert_eq!(solve_2_sync(&INPUT), 6);
+    }
+
+    #[test]
+    fn same_results_2_par() {
+        assert_eq!(solve_2_par(&INPUT), 6);
     }
 }
