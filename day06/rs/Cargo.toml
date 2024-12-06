@@ -24,3 +24,4 @@ pedantic = "deny"
 
 [profile.release]
 codegen-units = 1
+debug = true

@@ -1,11 +1,14 @@
 [package]
-name = "day01ui"
+name = "day14ui"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-day01 = { path = "../rs" }
+day14 = { path = "../rs" }
 ui = { path = "../../common/rs/ui", features = ["wasm-bindgen"]}
+
+[build-dependencies]
+aoc = { path = "../../common/rs/aoc" }
 
 [dependencies.yew]
 version = "0.21"

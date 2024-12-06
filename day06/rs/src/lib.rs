@@ -122,16 +122,17 @@ pub fn solve_1(input: &str) -> usize {
 fn is_cycle<const SIZE: usize, K>(
     map: &[u8],
     (height, width): (usize, usize),
-    mut visited: BitSet<SIZE, ((usize, usize), usize), K>,
+    guard_visited: &BitSet<SIZE, ((usize, usize), usize), K>,
     (mut r, mut c): (usize, usize),
     mut facing: usize,
     obstruction: (usize, usize),
 ) -> bool
 where
-    K: Fn(&((usize, usize), usize)) -> usize,
+    K: Fn(&((usize, usize), usize)) -> usize + Copy,
 {
+    let mut visited = BitSet::<SIZE, _, _>::new(guard_visited.key);
     loop {
-        if visited.insert(((r, c), facing)) {
+        if visited.insert(((r, c), facing)) || guard_visited.contains(&((r, c), facing)) {
             return true;
         }
 
@@ -237,7 +238,7 @@ pub fn solve_2_par(input: &str) -> usize {
         is_cycle(
             map,
             (height, width),
-            *visited,
+            visited,
             *position,
             *facing,
             *obstruction,
@@ -303,7 +304,7 @@ pub fn solve_2_sync(input: &str) -> usize {
             && is_cycle(
                 map,
                 (height, width),
-                visited_pd,
+                &visited_pd,
                 current_position,
                 (next_facing + 1) % 4,
                 next_position,
