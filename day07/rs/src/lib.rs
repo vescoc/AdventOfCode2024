@@ -15,10 +15,21 @@ lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
 
-fn solve<F>(input: &str, valid: F) -> u64
-where
-    F: Fn(u64, &[u64]) -> bool + Sync,
-{
+trait Part {
+    const OPS: &[u32];
+}
+
+struct Part1;
+impl Part for Part1 {
+    const OPS: &[u32] = &[0, 1];
+}
+
+struct Part2;
+impl Part for Part2 {
+    const OPS: &[u32] = &[0, 1, 2];
+}
+
+fn solve<P: Part>(input: &str) -> u64 {
     #[cfg(not(target_family = "wasm"))]
     let lines = input.par_lines();
 
@@ -37,97 +48,62 @@ where
                 .map(|number| number.parse::<u64>().unwrap())
                 .collect::<Vec<_>>();
 
-            if valid(target, &numbers) {
-                Some(target)
-            } else {
-                None
+            if let Some((&a, ax)) = numbers.split_first() {
+                let Some((&b, bx)) = ax.split_first() else {
+                    if a == target {
+                        return Some(target);
+                    }
+
+                    return None;
+                };
+
+                let mut stack = Stack::new();
+                for op in P::OPS {
+                    stack.push((a, b, bx, op)).unwrap();
+                }
+
+                while let Some((a, b, rx, op)) = stack.pop() {
+                    let n = match op {
+                        0 => a + b,
+                        1 => a * b,
+                        2 => {
+                            let mut bb = b;
+                            let mut a = a;
+                            while bb > 0 {
+                                bb /= 10;
+                                a *= 10;
+                            }
+                            a + b
+                        }
+                        _ => unreachable!(),
+                    };
+
+                    if let Some((&b, bx)) = rx.split_first() {
+                        if n <= target {
+                            for op in P::OPS {
+                                stack.push((n, b, bx, op)).unwrap();
+                            }
+                        }
+                    } else if n == target {
+                        return Some(target);
+                    }
+                }
             }
+
+            None
         })
         .sum()
 }
 
 /// # Panics
 pub fn solve_1(input: &str) -> u64 {
-    solve(input, |target, numbers| {
-        if let Some((&a, ax)) = numbers.split_first() {
-            if ax.is_empty() {
-                return a == target;
-            }
-
-            let mut stack = Stack::new();
-            stack.push((a, ax, 0)).unwrap();
-            stack.push((a, ax, 1)).unwrap();
-
-            while let Some((a, ax, op)) = stack.pop() {
-                let (&b, bx) = ax.split_first().unwrap();
-
-                let n = match op {
-                    0 => a + b,
-                    1 => a * b,
-                    _ => unreachable!(),
-                };
-
-                if bx.is_empty() {
-                    if n == target {
-                        return true;
-                    }
-                } else if n <= target {
-                    stack.push((n, bx, 0)).unwrap();
-                    stack.push((n, bx, 1)).unwrap();
-                }
-            }
-        }
-
-        false
-    })
+    solve::<Part1>(input)
 }
 
 /// # Panics
 #[allow(clippy::cast_possible_truncation)]
 pub fn solve_2(input: &str) -> u64 {
-    solve(input, |target, numbers| {
-        if let Some((&a, ax)) = numbers.split_first() {
-            if ax.is_empty() {
-                return a == target;
-            }
-
-            let mut stack = Stack::new();
-            stack.push((a, ax, 0)).unwrap();
-            stack.push((a, ax, 1)).unwrap();
-            stack.push((a, ax, 2)).unwrap();
-
-            while let Some((a, ax, op)) = stack.pop() {
-                let (&b, bx) = ax.split_first().unwrap();
-
-                let n = match op {
-                    0 => a + b,
-                    1 => a * b,
-                    2 => {
-                        let mut bb = b;
-                        let mut a = a;
-                        while bb > 0 {
-                            bb /= 10;
-                            a *= 10;
-                        }
-                        a + b
-                    }
-                    _ => unreachable!(),
-                };
-
-                if bx.is_empty() {
-                    if n == target {
-                        return true;
-                    }
-                } else if n <= target {
-                    stack.push((n, bx, 0)).unwrap();
-                    stack.push((n, bx, 1)).unwrap();
-                    stack.push((n, bx, 2)).unwrap();
-                }
-            }
-        }
-
-        false
-    })
+    solve::<Part2>(input)
 }
 
 pub fn part_1() -> u64 {
