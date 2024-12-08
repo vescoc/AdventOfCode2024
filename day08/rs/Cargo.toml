@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+heapless = "0.8.0"
 lazy_static = "1.4"
+bitset = { path = "../../common/rs/bitset" }
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
@@ -15,3 +17,10 @@ aoc = { path = "../../common/rs/aoc" }
 [[bench]]
 name = "bench"
 harness = false
+
+[lints.clippy]
+pedantic = "deny"
+
+[profile.release]
+codegen-units = 1
+debug = true

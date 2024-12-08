@@ -1,74 +1,20 @@
 #![no_std]
-
 #![allow(clippy::must_use_candidate)]
 
 use core::mem;
 
+use bitset::BitSet;
+
 #[cfg(not(target_family = "wasm"))]
 use rayon::prelude::*;
+
+const VISITED_SIZE: usize = 131 * 131 / mem::size_of::<u128>();
+const VISITED_STATE_SIZE: usize = 131 * 131 * 5 / mem::size_of::<u128>();
 
 use lazy_static::lazy_static;
 
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
-}
-
-#[derive(Copy, Clone)]
-pub struct BitSet<const SIZE: usize, T, K: Fn(&T) -> usize> {
-    data: [usize; SIZE],
-    key: K,
-    _marker: core::marker::PhantomData<T>,
-}
-
-impl<const SIZE: usize, T, K: Fn(&T) -> usize> BitSet<SIZE, T, K> {
-    pub const fn new(key: K) -> Self {
-        Self {
-            data: [0; SIZE],
-            key,
-            _marker: core::marker::PhantomData,
-        }
-    }
-
-    #[allow(clippy::needless_pass_by_value)]
-    pub fn insert(&mut self, idx: T) -> bool {
-        let idx = (self.key)(&idx);
-        let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
-
-        let data = &mut self.data[i];
-
-        let mask = 1 << b;
-
-        let result = *data & mask != 0;
-
-        *data |= mask;
-
-        result
-    }
-
-    pub fn contains(&self, idx: &T) -> bool {
-        let idx = (self.key)(idx);
-        let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
-
-        self.data[i] & (1 << b) != 0
-    }
-
-    pub fn remove(&mut self, idx: &T) {
-        let idx = (self.key)(idx);
-        let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
-
-        self.data[i] &= !(1 << b);
-    }
-
-    pub fn len(&self) -> usize {
-        self.data
-            .iter()
-            .map(|value| value.count_ones() as usize)
-            .sum()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.data.iter().all(|&value| value == 0)
-    }
 }
 
 /// # Panics
@@ -83,8 +29,7 @@ pub fn solve_1(input: &str) -> usize {
         current_position % (width + 1),
     );
 
-    let mut visited =
-        BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
+    let mut visited = BitSet::<_, _, VISITED_SIZE>::new(|(r, c)| r * width + c);
 
     let mut facing = 0;
     loop {
@@ -122,7 +67,7 @@ pub fn solve_1(input: &str) -> usize {
 fn is_cycle<const SIZE: usize, K>(
     map: &[u8],
     (height, width): (usize, usize),
-    guard_visited: &BitSet<SIZE, ((usize, usize), usize), K>,
+    guard_visited: &BitSet<((usize, usize), usize), K, SIZE>,
     (mut r, mut c): (usize, usize),
     mut facing: usize,
     obstruction: (usize, usize),
@@ -130,7 +75,7 @@ fn is_cycle<const SIZE: usize, K>(
 where
     K: Fn(&((usize, usize), usize)) -> usize + Copy,
 {
-    let mut visited = BitSet::<SIZE, _, _>::new(guard_visited.key);
+    let mut visited = BitSet::<_, _, SIZE>::new(guard_visited.key());
     loop {
         if visited.insert(((r, c), facing)) || guard_visited.contains(&((r, c), facing)) {
             return true;
@@ -175,12 +120,9 @@ pub fn solve_2_par(input: &str) -> usize {
         current_position % (width + 1),
     );
 
-    let mut visited =
-        BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
+    let mut visited = BitSet::<_, _, VISITED_SIZE>::new(|(r, c)| r * width + c);
     let mut visited_pd =
-        BitSet::<{ 256 * 256 * 5 / mem::size_of::<u128>() }, _, _>::new(|((r, c), f)| {
-            r * width + c + f * width * height
-        });
+        BitSet::<_, _, VISITED_STATE_SIZE>::new(|((r, c), f)| r * width + c + f * width * height);
 
     let mut facing = 0;
     core::iter::from_fn(|| loop {
@@ -259,12 +201,9 @@ pub fn solve_2_sync(input: &str) -> usize {
         current_position % (width + 1),
     );
 
-    let mut visited =
-        BitSet::<{ 256 * 256 / mem::size_of::<u128>() }, _, _>::new(|(r, c)| r * width + c);
+    let mut visited = BitSet::<_, _, VISITED_SIZE>::new(|(r, c)| r * width + c);
     let mut visited_pd =
-        BitSet::<{ 256 * 256 * 5 / mem::size_of::<u128>() }, _, _>::new(|((r, c), f)| {
-            r * width + c + f * width * height
-        });
+        BitSet::<_, _, VISITED_STATE_SIZE>::new(|((r, c), f)| r * width + c + f * width * height);
 
     let mut count = 0;
     let mut facing = 0;

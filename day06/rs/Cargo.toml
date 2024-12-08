@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 lazy_static = "1.4"
+bitset = { path = "../../common/rs/bitset" }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 rayon = "1.10.0"
