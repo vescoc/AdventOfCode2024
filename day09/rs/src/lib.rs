@@ -10,7 +10,7 @@ lazy_static! {
 }
 
 /// # Panics
-pub fn solve_1(input: &str) -> usize {
+pub fn solve_1(input: &str) -> u64 {
     #[derive(Copy, Clone)]
     enum Block {
         Free,
@@ -55,7 +55,7 @@ pub fn solve_1(input: &str) -> usize {
     disk.iter()
         .enumerate()
         .filter_map(|(i, block)| match block {
-            Block::Occupied(id) => Some(i * id),
+            Block::Occupied(id) => Some(i as u64 * *id as u64),
             Block::Free => None,
         })
         .sum()
@@ -63,7 +63,7 @@ pub fn solve_1(input: &str) -> usize {
 
 /// # Panics
 #[allow(clippy::too_many_lines)]
-pub fn solve_2(input: &str) -> usize {
+pub fn solve_2(input: &str) -> u64 {
     #[derive(Debug)]
     struct Info {
         id: usize,
@@ -171,15 +171,15 @@ pub fn solve_2(input: &str) -> usize {
     moved_blocks
         .into_iter()
         .chain(occupied_heap)
-        .flat_map(|Info { id, idx, size }| (idx..idx + size).map(move |i| id * i))
+        .flat_map(|Info { id, idx, size }| (idx..idx + size).map(move |i| id as u64 * i as u64))
         .sum()
 }
 
-pub fn part_1() -> usize {
+pub fn part_1() -> u64 {
     solve_1(&INPUT)
 }
 
-pub fn part_2() -> usize {
+pub fn part_2() -> u64 {
     solve_2(&INPUT)
 }
 
