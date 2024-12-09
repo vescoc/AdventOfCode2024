@@ -15,3 +15,10 @@ aoc = { path = "../../common/rs/aoc" }
 [[bench]]
 name = "bench"
 harness = false
+
+[lints.clippy]
+pedantic = "deny"
+
+[profile.release]
+debug = true
+codegen-units = 1
