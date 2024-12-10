@@ -1,10 +1,21 @@
 use core::{marker, mem};
 
+const BITS: usize = mem::size_of::<u128>() * 8;
+
+#[derive(Debug)]
+pub struct Error;
+
 #[derive(Copy, Clone)]
 pub struct BitSet<T, K: Fn(&T) -> usize, const SIZE: usize> {
     data: [u128; SIZE],
     key: K,
     _marker: marker::PhantomData<T>,
+}
+
+impl BitSet<(), fn(&()) -> usize, 0> {
+    pub const fn with_capacity(size: usize) -> usize {
+        size / BITS
+    }
 }
 
 impl<T, K: Fn(&T) -> usize, const SIZE: usize> BitSet<T, K, SIZE> {
@@ -17,11 +28,11 @@ impl<T, K: Fn(&T) -> usize, const SIZE: usize> BitSet<T, K, SIZE> {
     }
 
     #[allow(clippy::needless_pass_by_value)]
-    pub fn insert(&mut self, idx: T) -> bool {
+    pub fn insert(&mut self, idx: T) -> Result<bool, Error> {
         let idx = (self.key)(&idx);
-        let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
+        let (i, b) = (idx / BITS, idx % BITS);
 
-        let data = &mut self.data[i];
+        let data = self.data.get_mut(i).ok_or(Error)?;
 
         let mask = 1 << b;
 
@@ -29,21 +40,23 @@ impl<T, K: Fn(&T) -> usize, const SIZE: usize> BitSet<T, K, SIZE> {
 
         *data |= mask;
 
-        result
+        Ok(result)
     }
 
-    pub fn contains(&self, idx: &T) -> bool {
+    pub fn contains(&self, idx: &T) -> Result<bool, Error> {
         let idx = (self.key)(idx);
-        let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
+        let (i, b) = (idx / BITS, idx % BITS);
 
-        self.data[i] & (1 << b) != 0
+        Ok(self.data.get(i).ok_or(Error)? & (1 << b) != 0)
     }
 
-    pub fn remove(&mut self, idx: &T) {
+    pub fn remove(&mut self, idx: &T) -> Result<(), Error> {
         let idx = (self.key)(idx);
-        let (i, b) = (idx / mem::size_of::<u128>(), idx % mem::size_of::<u128>());
+        let (i, b) = (idx / BITS, idx % BITS);
 
-        self.data[i] &= !(1 << b);
+        *self.data.get_mut(i).ok_or(Error)? &= !(1 << b);
+
+        Ok(())
     }
 
     pub fn len(&self) -> usize {

@@ -1,8 +1,6 @@
 #![no_std]
 #![allow(clippy::must_use_candidate)]
 
-use core::mem;
-
 use bitset::BitSet;
 
 use heapless::{Entry, FnvIndexMap, Vec as HLVec};
@@ -10,7 +8,7 @@ use heapless::{Entry, FnvIndexMap, Vec as HLVec};
 use lazy_static::lazy_static;
 
 const MAP_SIZE: usize = 64;
-const SET_SIZE: usize = MAP_SIZE * MAP_SIZE / mem::size_of::<u128>();
+const SET_SIZE: usize = BitSet::with_capacity(MAP_SIZE * MAP_SIZE);
 
 type HashMap<K, V> = FnvIndexMap<K, V, MAP_SIZE>;
 type Vec<T> = HLVec<T, 16>;
@@ -115,10 +113,10 @@ where
         for (i, a) in nodes.iter().enumerate().take(nodes.len() - 1) {
             for b in nodes.iter().skip(i + 1) {
                 for antinode in calculate_antinodes((height, width), a, b) {
-                    antinodes.insert(antinode);
+                    antinodes.insert(antinode).unwrap();
                 }
                 for antinode in calculate_antinodes((height, width), b, a) {
-                    antinodes.insert(antinode);
+                    antinodes.insert(antinode).unwrap();
                 }
             }
         }

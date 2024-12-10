@@ -1,15 +1,13 @@
 #![no_std]
 #![allow(clippy::must_use_candidate)]
 
-use core::mem;
-
 use bitset::BitSet;
 
 #[cfg(not(target_family = "wasm"))]
 use rayon::prelude::*;
 
-const VISITED_SIZE: usize = 131 * 131 / mem::size_of::<u128>();
-const VISITED_STATE_SIZE: usize = 131 * 131 * 5 / mem::size_of::<u128>();
+const VISITED_SIZE: usize = BitSet::with_capacity(131 * 131);
+const VISITED_STATE_SIZE: usize = BitSet::with_capacity(131 * 131 * 5);
 
 use lazy_static::lazy_static;
 
@@ -33,7 +31,7 @@ pub fn solve_1(input: &str) -> usize {
 
     let mut facing = 0;
     loop {
-        visited.insert(current_position);
+        visited.insert(current_position).unwrap();
         if current_position.0 == 0
             || current_position.1 == 0
             || current_position.0 == width - 1
@@ -77,7 +75,7 @@ where
 {
     let mut visited = BitSet::<_, _, SIZE>::new(guard_visited.key());
     loop {
-        if visited.insert(((r, c), facing)) || guard_visited.contains(&((r, c), facing)) {
+        if visited.insert(((r, c), facing)).unwrap() || guard_visited.contains(&((r, c), facing)).unwrap() {
             return true;
         }
 
@@ -134,8 +132,8 @@ pub fn solve_2_par(input: &str) -> usize {
             return None;
         }
 
-        visited.insert(current_position);
-        visited_pd.insert((current_position, facing));
+        visited.insert(current_position).unwrap();
+        visited_pd.insert((current_position, facing)).unwrap();
 
         let (next_facing, next_position) = [(-1, 0), (0, 1), (1, 0), (0, -1)]
             .into_iter()
@@ -157,7 +155,7 @@ pub fn solve_2_par(input: &str) -> usize {
             })
             .unwrap();
 
-        let result = if visited.contains(&next_position) {
+        let result = if visited.contains(&next_position).unwrap() {
             None
         } else {
             Some((
@@ -216,8 +214,8 @@ pub fn solve_2_sync(input: &str) -> usize {
             return count;
         }
 
-        visited.insert(current_position);
-        visited_pd.insert((current_position, facing));
+        visited.insert(current_position).unwrap();
+        visited_pd.insert((current_position, facing)).unwrap();
 
         let (next_facing, next_position) = [(-1, 0), (0, 1), (1, 0), (0, -1)]
             .into_iter()
@@ -239,7 +237,7 @@ pub fn solve_2_sync(input: &str) -> usize {
             })
             .unwrap();
 
-        if !visited.contains(&next_position)
+        if !visited.contains(&next_position).unwrap()
             && is_cycle(
                 map,
                 (height, width),

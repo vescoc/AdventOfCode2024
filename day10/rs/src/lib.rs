@@ -11,7 +11,7 @@ use bitset::BitSet as VBitSet;
 use lazy_static::lazy_static;
 
 type VecDeque<T> = Deque<T, 32>;
-type BitSet<T, K> = VBitSet<T, K, { 64 * 64 / core::mem::size_of::<u128>() }>;
+type BitSet<T, K> = VBitSet<T, K, { VBitSet::with_capacity(64 * 64) }>;
 
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
@@ -57,7 +57,7 @@ pub fn solve_1(input: &str) -> usize {
     solve(input, |&(height, width), map, (r, c)| {
         let mut count = 0;
         let mut visited = BitSet::new(|(r, c)| r * (width + 1) + c);
-        visited.insert((r, c));
+        visited.insert((r, c)).unwrap();
 
         let mut queue = VecDeque::new();
         queue.push_back((r, c)).unwrap();
@@ -71,7 +71,7 @@ pub fn solve_1(input: &str) -> usize {
                         (Some(r), Some(c))
                             if r < width
                                 && c < height
-                                && !visited.insert((r, c))
+                                && !visited.insert((r, c)).unwrap()
                                 && map[r * (width + 1) + c] == tile + 1 =>
                         {
                             queue.push_back((r, c)).unwrap();
