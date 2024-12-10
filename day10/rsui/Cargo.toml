@@ -7,6 +7,9 @@ edition = "2021"
 day10 = { path = "../rs" }
 ui = { path = "../../common/rs/ui", features = ["wasm-bindgen"]}
 
+[build-dependencies]
+aoc = { path = "../../common/rs/aoc"}
+
 [dependencies.yew]
 version = "0.21"
 features = ["csr"]
