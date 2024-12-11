@@ -3,6 +3,10 @@ name = "day13"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.aoc]
+year = 2024
+day = 13
+
 [dependencies]
 lazy_static = "1.4"
 

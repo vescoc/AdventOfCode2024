@@ -3,6 +3,10 @@ name = "day06"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.aoc]
+year = 2024
+day = 6
+
 [dependencies]
 lazy_static = "1.4"
 bitset = { path = "../../common/rs/bitset" }

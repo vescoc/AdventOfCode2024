@@ -3,6 +3,10 @@ name = "day13ui"
 version = "0.1.0"
 edition = "2021"
 
+[package.metadata.aoc]
+year = 2024
+day = 13
+
 [dependencies]
 day13 = { path = "../rs" }
 ui = { path = "../../common/rs/ui", features = ["wasm-bindgen"]}
