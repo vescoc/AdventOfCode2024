@@ -1,11 +1,10 @@
 #![no_std]
 #![allow(clippy::must_use_candidate)]
 
-use heapless::{Entry, FnvIndexMap, Vec as HLVec};
+use heapless::{Entry, FnvIndexMap};
 
 use lazy_static::lazy_static;
 
-type Vec<T> = HLVec<T, 16>;
 type Map<K, T> = FnvIndexMap<K, T, 4096>;
 
 lazy_static! {
@@ -54,27 +53,15 @@ impl FromIterator<(u64, u64)> for Stones {
     }
 }
 
-fn split_if_even(mut stone: u64) -> Option<(u64, u64)> {
-    let mut digits = Vec::new();
-    while stone > 0 {
-        digits.push(stone % 10).unwrap();
-        stone /= 10;
-    }
-
-    if !digits.is_empty() && digits.len() % 2 == 0 {
-        let a = digits[digits.len() / 2..]
-            .iter()
-            .rev()
-            .fold(0, |acc, digit| acc * 10 + digit);
-        let b = digits[..digits.len() / 2]
-            .iter()
-            .rev()
-            .fold(0, |acc, digit| acc * 10 + digit);
-
-        Some((a, b))
-    } else {
-        None
-    }
+fn split_if_even(stone: u64) -> Option<(u64, u64)> {
+    stone.checked_ilog10().and_then(|digits| {
+        if digits % 2 == 1 {
+            let div = 10_u64.pow((digits + 1) / 2);
+            Some((stone / div, stone % div))
+        } else {
+            None
+        }
+    })
 }
 
 /// # Panics
