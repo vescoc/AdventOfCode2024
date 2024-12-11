@@ -30,10 +30,10 @@ where
     let height = (map.len() + 1) / (width + 1);
 
     #[cfg(not(target_family = "wasm"))]
-    let rows = map.par_chunks(width + 1);
+    let rows = map.par_chunks(width + 1).take(height);
 
     #[cfg(target_family = "wasm")]
-    let rows = map.chunks(width + 1);
+    let rows = map.chunks(width + 1).take(height);
 
     rows.enumerate()
         .map(|(r, row)| {
@@ -69,12 +69,11 @@ pub fn solve_1(input: &str) -> usize {
                 for (dr, dc) in [(0, 1), (0, -1), (1, 0), (-1, 0)] {
                     match (r.checked_add_signed(dr), c.checked_add_signed(dc)) {
                         (Some(r), Some(c))
-                            if r < width
-                                && c < height
-                                && !visited.insert((r, c)).unwrap()
-                                && map[r * (width + 1) + c] == tile + 1 =>
+                            if r < width && c < height && map[r * (width + 1) + c] == tile + 1 =>
                         {
-                            queue.push_back((r, c)).unwrap();
+                            if !visited.insert((r, c)).unwrap() {
+                                queue.push_back((r, c)).unwrap();
+                            }
                         }
                         _ => {}
                     }
