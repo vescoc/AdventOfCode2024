@@ -3,13 +3,18 @@
 
 use heapless::{Entry, FnvIndexMap};
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
 type Map<K, T> = FnvIndexMap<K, T, 4096>;
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub static INPUT: &'static str = &"";
 
 struct Stones(Map<u64, u64>);
 

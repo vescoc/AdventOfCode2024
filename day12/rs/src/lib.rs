@@ -1,10 +1,15 @@
 #![allow(clippy::must_use_candidate)]
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub static INPUT: &'static str = &"";
 
 /// # Panics
 pub fn solve_1(_input: &str) -> u32 {

@@ -1,30 +1,46 @@
+#![no_std]
 #![allow(clippy::must_use_candidate)]
 
-use hashbrown::HashMap;
+use heapless::{Entry, FnvIndexMap, Vec as HLVec};
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
+type HashMap<K, V> = FnvIndexMap<K, V, 1024>;
+type Vec<T> = HLVec<T, 1024>;
+
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+    
+#[cfg(not(feature = "input"))]
+pub static INPUT: &'static str = &"";
 
 struct CountHashMap<K, T>(HashMap<K, T>);
 
 impl<K, T> Default for CountHashMap<K, T> {
     fn default() -> Self {
-        Self(HashMap::with_capacity(1024))
+        Self(HashMap::new())
     }
 }
 
-impl std::iter::Extend<u32> for CountHashMap<u32, u32> {
+impl core::iter::Extend<u32> for CountHashMap<u32, u32> {
     fn extend<T: IntoIterator<Item = u32>>(&mut self, i: T) {
         for value in i {
-            *self.0.entry(value).or_default() += 1;
+            match self.0.entry(value) {
+                Entry::Occupied(mut v) => {
+                    *v.get_mut() += 1;
+                }
+                Entry::Vacant(v) => {
+                    v.insert(1).unwrap();
+                }
+            }
         }
     }
 }
 
-impl<K, T> std::ops::Deref for CountHashMap<K, T> {
+impl<K, T> core::ops::Deref for CountHashMap<K, T> {
     type Target = HashMap<K, T>;
 
     fn deref(&self) -> &Self::Target {

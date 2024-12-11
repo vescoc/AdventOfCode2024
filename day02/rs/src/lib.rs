@@ -1,19 +1,25 @@
+#![no_std]
 #![allow(clippy::must_use_candidate)]
 
-use std::cmp::Ordering;
+use core::cmp::Ordering;
 
 use heapless::Vec;
 
-#[cfg(not(target_family = "wasm"))]
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
 use itertools::Itertools;
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub static INPUT: &'static str = &"";
 
 trait SafeReport: Iterator<Item = u32> + Sized {
     fn safe_report(self) -> bool {
@@ -51,10 +57,10 @@ impl<I: Iterator<Item = u32>> SafeReport for I {}
 
 /// # Panics
 pub fn solve_1(input: &str) -> usize {
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(feature = "parallel")]
     let lines = input.par_lines();
 
-    #[cfg(target_family = "wasm")]
+    #[cfg(not(feature = "parallel"))]
     let lines = input.lines();
 
     lines
@@ -68,10 +74,10 @@ pub fn solve_1(input: &str) -> usize {
 
 /// # Panics
 pub fn solve_2(input: &str) -> usize {
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(feature = "parallel")]
     let lines = input.par_lines();
 
-    #[cfg(target_family = "wasm")]
+    #[cfg(not(feature = "parallel"))]
     let lines = input.lines();
 
     lines

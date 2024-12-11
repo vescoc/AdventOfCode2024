@@ -3,13 +3,18 @@ name = "day11"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = ["input"]
+
+input = ["dep:lazy_static"]
+
 [package.metadata.aoc]
 year = 2024
 day = 11
 
 [dependencies]
 heapless = "0.8.0"
-lazy_static = "1.4"
+lazy_static = { version = "1.4", optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

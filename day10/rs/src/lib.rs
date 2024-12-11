@@ -1,21 +1,26 @@
 #![no_std]
 #![allow(clippy::must_use_candidate)]
 
-#[cfg(not(target_family = "wasm"))]
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
 use heapless::Deque;
 
 use bitset::BitSet as VBitSet;
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
 type VecDeque<T> = Deque<T, 32>;
 type BitSet<T, K> = VBitSet<T, K, { VBitSet::with_capacity(64 * 64) }>;
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub static INPUT: &'static str = &"";
 
 /// (rows x columns)
 type Point = (usize, usize);
@@ -29,10 +34,10 @@ where
     let width = map.iter().position(|&c| c == b'\n').unwrap();
     let height = (map.len() + 1) / (width + 1);
 
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(feature = "parallel")]
     let rows = map.par_chunks(width + 1).take(height);
 
-    #[cfg(target_family = "wasm")]
+    #[cfg(not(feature = "parallel"))]
     let rows = map.chunks(width + 1).take(height);
 
     rows.enumerate()

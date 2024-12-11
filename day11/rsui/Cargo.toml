@@ -8,7 +8,7 @@ year = 2024
 day = 11
 
 [dependencies]
-day11 = { path = "../rs" }
+day11 = { path = "../rs", default-features = false }
 ui = { path = "../../common/rs/ui", features = ["wasm-bindgen"]}
 
 [build-dependencies]

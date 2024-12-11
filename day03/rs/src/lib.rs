@@ -1,3 +1,4 @@
+#![no_std]
 #![allow(clippy::must_use_candidate)]
 
 use nom::{
@@ -10,6 +11,7 @@ use nom::{
     IResult,
 };
 
+#[cfg(not(feature = "input"))]
 use lazy_static::lazy_static;
 
 enum Either<L, R> {
@@ -17,9 +19,13 @@ enum Either<L, R> {
     Right(R),
 }
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub static INPUT: &'static str = &"";
 
 const MUL_TOKEN: &[u8] = b"mul(";
 const DO_TOKEN: &[u8] = b"do()";
