@@ -14,6 +14,8 @@ day = 12
 
 [dependencies]
 lazy_static = { version = "1.4", optional = true }
+bitset = { path = "../../common/rs/bitset" }
+heapless = "0.8.0"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

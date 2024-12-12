@@ -14,7 +14,9 @@ pub struct BitSet<T, K: Fn(&T) -> usize, const SIZE: usize> {
 
 impl BitSet<(), fn(&()) -> usize, 0> {
     pub const fn with_capacity(size: usize) -> usize {
-        size / BITS
+        assert!(size > 0, "invalid size");
+        
+        size / BITS + if size % BITS == 0 { 0 } else { 1 }
     }
 }
 
