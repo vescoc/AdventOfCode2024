@@ -17,7 +17,7 @@ lazy_static! {
 }
 
 #[cfg(not(feature = "input"))]
-pub static INPUT: &'static str = &"";
+pub const INPUT: &str = "";
 
 fn solve<ACC, A, F>(input: &str, accumulate: A, finalize: F) -> usize
 where
@@ -112,7 +112,7 @@ pub fn solve_2(input: &str) -> usize {
             vertex
                 .values()
                 .map(|v| match v.count_ones() {
-                    0 | 1 => 0,
+                    1 => 0,
                     2 => 1,
                     4 => 2,
                     _ => panic!("{v:08b}"),
