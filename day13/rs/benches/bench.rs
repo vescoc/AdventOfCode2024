@@ -28,6 +28,16 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         Machine0i64 => i64,
         Machine0i128 => i128
     );
+
+    #[cfg(feature = "simd")]
+    {
+        group.bench_function("i32 simd<4>", |b| b.iter(|| simd::solve_1::<4>(&INPUT)));
+        group.bench_function("i32 simd<8>", |b| b.iter(|| simd::solve_1::<8>(&INPUT)));
+        group.bench_function("i32 simd<16>", |b| b.iter(|| simd::solve_1::<16>(&INPUT)));
+        group.bench_function("i32 simd<32>", |b| b.iter(|| simd::solve_1::<32>(&INPUT)));
+        group.bench_function("i32 simd<64>", |b| b.iter(|| simd::solve_1::<64>(&INPUT)));
+    }
+
     group.finish();
 
     let mut group = c.benchmark_group("part 2");

@@ -1,7 +1,11 @@
-#![no_std]
+// #![no_std]
+#![cfg_attr(feature = "simd", feature(portable_simd))]
 #![allow(clippy::must_use_candidate)]
 
 use core::{cmp, convert, iter, ops};
+
+#[cfg(feature = "simd")]
+pub mod simd;
 
 #[cfg(feature = "input")]
 use lazy_static::lazy_static;
@@ -172,7 +176,7 @@ mod tests {
     use super::*;
 
     lazy_static! {
-        static ref INPUT_1: &'static str = r#"Button A: X+94, Y+34
+        pub(crate) static ref INPUT: &'static str = r#"Button A: X+94, Y+34
 Button B: X+22, Y+67
 Prize: X=8400, Y=5400
 
@@ -187,7 +191,6 @@ Prize: X=7870, Y=6450
 Button A: X+69, Y+23
 Button B: X+27, Y+71
 Prize: X=18641, Y=10279"#;
-        static ref INPUT_2: &'static str = r#""#;
     }
 
     #[test]
@@ -240,6 +243,6 @@ Prize: X=18641, Y=10279"#
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT_1), 480);
+        assert_eq!(solve_1(&INPUT), 480);
     }
 }
