@@ -98,7 +98,7 @@ fn push_down_or_right<const DR: usize, const DC: usize>(
 }
 
 #[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
-fn large_push_up_down<const DIRECTION: isize>(
+fn large_push_up_down_rec<const DIRECTION: isize>(
     map: &mut [u8],
     &(height, width): &Position,
     &(r, c): &Position,
@@ -111,7 +111,7 @@ fn large_push_up_down<const DIRECTION: isize>(
         let rn = (r as isize + DIRECTION) as usize;
 
         let (_, width) = dim;
-        
+
         // [][]
         // .[].
         match (map[rn * (width + 1) + c], map[rn * (width + 1) + c + 1]) {
@@ -124,7 +124,7 @@ fn large_push_up_down<const DIRECTION: isize>(
             (b']', b'.') => can_push_box::<DIRECTION>(map, dim, &(rn, c - 1)),
             (b'.', b'[') => can_push_box::<DIRECTION>(map, dim, &(rn, c + 1)),
             _ => false,
-        }            
+        }
     }
 
     fn push_box<const DIRECTION: isize>(
@@ -169,6 +169,112 @@ fn large_push_up_down<const DIRECTION: isize>(
     }
 }
 
+#[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
+fn large_push_up_down_bfs<const DIRECTION: isize>(
+    map: &mut [u8],
+    &(_, width): &Position,
+    &(r, c): &Position,
+) -> Position {
+    use heapless::Deque as HLDeque;
+
+    type Queue<T> = HLDeque<T, 64>;
+
+    let mut list = [0_u128; 64];
+
+    let bfs = |map: &[u8], list: &mut [u128], &(r, c): &Position| {
+        let mut max_level = usize::MIN;
+
+        let mut queue = Queue::new();
+        queue.push_back(((r, c), 0)).unwrap();
+
+        while let Some(((r, c), level)) = queue.pop_back() {
+            max_level = max_level.max(level);
+
+            list[level] |= 1 << c;
+
+            let rn = (r as isize + DIRECTION) as usize;
+
+            // [][]
+            // .[].
+            match (map[rn * (width + 1) + c], map[rn * (width + 1) + c + 1]) {
+                (b'.', b'.') => continue,
+                (b'[', b']') => {
+                    if list[level + 1] & 1 << c == 0 {
+                        list[level + 1] |= 1 << c;
+                        queue.push_back(((rn, c), level + 1)).unwrap();
+                    }
+                }
+                (b']', b'[') => {
+                    if list[level + 1] & 1 << (c - 1) == 0 {
+                        list[level + 1] |= 1 << (c - 1);
+                        queue.push_back(((rn, c - 1), level + 1)).unwrap();
+                    }
+                    if list[level + 1] & 1 << (c + 1) == 0 {
+                        list[level + 1] |= 1 << (c + 1);
+                        queue.push_back(((rn, c + 1), level + 1)).unwrap();
+                    }
+                }
+                (b']', b'.') => {
+                    if list[level + 1] & 1 << (c - 1) == 0 {
+                        list[level + 1] |= 1 << (c - 1);
+                        queue.push_back(((rn, c - 1), level + 1)).unwrap();
+                    }
+                }
+                (b'.', b'[') => {
+                    if list[level + 1] & 1 << (c + 1) == 0 {
+                        list[level + 1] |= 1 << (c + 1);
+                        queue.push_back(((rn, c + 1), level + 1)).unwrap();
+                    }
+                }
+                _ => return None,
+            }
+        }
+
+        Some(max_level + 1)
+    };
+
+    let push = |map: &mut [u8], list: &[u128], r| {
+        for (i, set) in list.iter().enumerate().rev() {
+            for c in 0..width {
+                if set & (1 << c) != 0 {
+                    let rd = (r as isize + DIRECTION * (i as isize + 1)) as usize;
+                    let rs = (r as isize + DIRECTION * i as isize) as usize;
+
+                    (map[rd * (width + 1) + c], map[rd * (width + 1) + c + 1]) = (b'[', b']');
+
+                    (map[rs * (width + 1) + c], map[rs * (width + 1) + c + 1]) = (b'.', b'.');
+                }
+            }
+        }
+    };
+
+    let rn = (r as isize + DIRECTION) as usize;
+
+    // last row are walls
+    match map[rn * (width + 1) + c] {
+        b'.' => (rn, c),
+        b']' => {
+            if let Some(level) = bfs(map, &mut list, &(rn, c - 1)) {
+                push(map, &list[0..level], rn);
+
+                (rn, c)
+            } else {
+                (r, c)
+            }
+        }
+        b'[' => {
+            if let Some(level) = bfs(map, &mut list, &(rn, c)) {
+                push(map, &list[0..level], rn);
+
+                (rn, c)
+            } else {
+                (r, c)
+            }
+        }
+        _ => (r, c),
+    }
+}
+
 /// # Panics
 pub fn solve_1(input: &str) -> usize {
     solve::<b'O'>(
@@ -180,7 +286,7 @@ pub fn solve_1(input: &str) -> usize {
 }
 
 /// # Panics
-pub fn solve_2(input: &str) -> usize {
+pub fn solve_2_rec(input: &str) -> usize {
     solve::<b'['>(
         input,
         |data| {
@@ -196,10 +302,34 @@ pub fn solve_2(input: &str) -> usize {
                 .copied()
                 .collect::<Vec<_>>()
         },
-        large_push_up_down::<-1>,
-        large_push_up_down::<1>,
+        large_push_up_down_rec::<-1>,
+        large_push_up_down_rec::<1>,
     )
 }
+
+/// # Panics
+pub fn solve_2_bfs(input: &str) -> usize {
+    solve::<b'['>(
+        input,
+        |data| {
+            data.iter()
+                .flat_map(|&tile| match tile {
+                    b'#' => [b'#', b'#'].as_slice(),
+                    b'O' => [b'[', b']'].as_slice(),
+                    b'.' => [b'.', b'.'].as_slice(),
+                    b'@' => [b'@', b'.'].as_slice(),
+                    b'\n' => [b'\n'].as_slice(),
+                    _ => panic!("invalid char: {tile}"),
+                })
+                .copied()
+                .collect::<Vec<_>>()
+        },
+        large_push_up_down_bfs::<-1>,
+        large_push_up_down_bfs::<1>,
+    )
+}
+
+use solve_2_rec as solve_2;
 
 /// # Panics
 fn solve<const TARGET: u8>(
@@ -231,7 +361,7 @@ fn solve<const TARGET: u8>(
         .unwrap();
 
     map[r * (width + 1) + c] = b'.';
-    
+
     for m in parts.next().unwrap().lines().flat_map(|line| line.chars()) {
         match m {
             '^' => (r, c) = push_up(&mut map, &(height, width), &(r, c)),
@@ -409,7 +539,18 @@ mod tests {
     }
 
     #[test]
+    fn same_results_2_rec() {
+        assert_eq!(solve_2_rec(&INPUT_2), 9021);
+    }
+
+    #[test]
+    fn same_results_2_bfs() {
+        assert_eq!(solve_2_bfs(&INPUT_2), 9021);
+    }
+
+    #[cfg(feature = "input")]
+    #[test]
     fn same_results_2() {
-        assert_eq!(solve_2(&INPUT_2), 9021);
+        assert_eq!(solve_2_rec(&INPUT), solve_2_bfs(&INPUT));
     }
 }
