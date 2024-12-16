@@ -11,7 +11,7 @@ use nom::{
     IResult,
 };
 
-#[cfg(not(feature = "input"))]
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
 enum Either<L, R> {
@@ -25,7 +25,7 @@ lazy_static! {
 }
 
 #[cfg(not(feature = "input"))]
-pub static INPUT: &'static str = &"";
+pub const INPUT: &str = "";
 
 const MUL_TOKEN: &[u8] = b"mul(";
 const DO_TOKEN: &[u8] = b"do()";
