@@ -3,17 +3,22 @@
 
 use bitset::BitSet;
 
-#[cfg(not(target_family = "wasm"))]
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
 const VISITED_SIZE: usize = BitSet::with_capacity(131 * 131);
 const VISITED_STATE_SIZE: usize = BitSet::with_capacity(131 * 131 * 5);
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub const INPUT: &str = "";
 
 /// # Panics
 pub fn solve_1(input: &str) -> usize {
@@ -106,7 +111,7 @@ where
 }
 
 /// # Panics
-#[cfg(not(target_family = "wasm"))]
+#[cfg(feature = "parallel")]
 pub fn solve_2_par(input: &str) -> usize {
     let map = input.as_bytes();
     let width = map.iter().position(|&c| c == b'\n').unwrap();
@@ -256,10 +261,12 @@ pub fn solve_2_sync(input: &str) -> usize {
 
 pub use solve_2_sync as solve_2;
 
+#[cfg(feature = "input")]
 pub fn part_1() -> usize {
     solve_1(&INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> usize {
     solve_2(&INPUT)
 }

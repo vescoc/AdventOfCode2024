@@ -1,13 +1,18 @@
 #![allow(clippy::must_use_candidate)]
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
-#[cfg(not(target_family = "wasm"))]
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub const INPUT: &str = "";
 
 /// # Panics
 pub fn solve_1(input: &str) -> usize {
@@ -17,10 +22,10 @@ pub fn solve_1(input: &str) -> usize {
 
     let width = data.iter().position(|&c| c == b'\n').unwrap();
 
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(feature = "parallel")]
     let rows = data.par_chunks(width + 1);
 
-    #[cfg(target_family = "wasm")]
+    #[cfg(not(feature = "parallel"))]
     let rows = data.chunks(width + 1);
 
     rows.enumerate()
@@ -84,10 +89,10 @@ pub fn solve_2(input: &str) -> usize {
 
     let check_ms = |a, b| a != b && (a == b'M' || a == b'S') && (b == b'M' || b == b'S');
 
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(feature = "parallel")]
     let rows = data.par_chunks(width + 1);
 
-    #[cfg(target_family = "wasm")]
+    #[cfg(not(feature = "parallel"))]
     let rows = data.chunks(width + 1);
 
     rows.enumerate()
@@ -114,10 +119,12 @@ pub fn solve_2(input: &str) -> usize {
         .sum()
 }
 
+#[cfg(feature = "input")]
 pub fn part_1() -> usize {
     solve_1(&INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> usize {
     solve_2(&INPUT)
 }

@@ -4,9 +4,10 @@
 
 use heapless::{Vec as HLVec, FnvIndexSet};
 
-#[cfg(not(target_family = "wasm"))]
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
 type Vec<T> = HLVec<T, 32>;
@@ -15,9 +16,13 @@ type HashSet<T> = FnvIndexSet<T, 2048>;
 
 type Rules = HashSet<(u32, u32)>;
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub const INPUT: &str = "";
 
 fn is_valid(rules: &Rules, pages: &[u32]) -> bool {
     (0..pages.len() - 1).all(|i| {
@@ -63,10 +68,10 @@ where
         })
         .collect::<Rules>();
 
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(feature = "parallel")]
     let lines = parts.next().unwrap().par_lines();
 
-    #[cfg(target_family = "wasm")]
+    #[cfg(not(feature = "parallel"))]
     let lines = parts.next().unwrap().lines();
 
     lines
@@ -105,10 +110,12 @@ pub fn solve_2(input: &str) -> u32 {
     })
 }
 
+#[cfg(feature = "input")]
 pub fn part_1() -> u32 {
     solve_1(&INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> u32 {
     solve_2(&INPUT)
 }

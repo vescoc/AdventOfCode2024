@@ -257,10 +257,12 @@ pub fn solve_2_handmade(input: &str) -> u32 {
 
 pub use solve_2_handmade as solve_2;
 
+#[cfg(feature = "input")]
 pub fn part_1() -> u32 {
     solve_1(&INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> u32 {
     solve_2(&INPUT)
 }

@@ -19,7 +19,7 @@ lazy_static! {
 }
 
 #[cfg(not(feature = "input"))]
-pub static INPUT: &'static str = &"";
+pub const INPUT: &str = "";
 
 trait SafeReport: Iterator<Item = u32> + Sized {
     fn safe_report(self) -> bool {
@@ -101,10 +101,12 @@ pub fn solve_2(input: &str) -> usize {
         .count()
 }
 
+#[cfg(feature = "input")]
 pub fn part_1() -> usize {
     solve_1(&INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> usize {
     solve_2(&INPUT)
 }

@@ -15,7 +15,7 @@ lazy_static! {
 }
     
 #[cfg(not(feature = "input"))]
-pub static INPUT: &'static str = &"";
+pub const INPUT: &str = "";
 
 struct CountHashMap<K, T>(HashMap<K, T>);
 
@@ -92,10 +92,12 @@ pub fn solve_2(input: &str) -> u32 {
         .sum()
 }
 
+#[cfg(feature = "input")]
 pub fn part_1() -> u32 {
     solve_1(&INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> u32 {
     solve_2(&INPUT)
 }
