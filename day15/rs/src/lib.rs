@@ -329,7 +329,7 @@ pub fn solve_2_bfs(input: &str) -> usize {
     )
 }
 
-use solve_2_rec as solve_2;
+pub use solve_2_rec as solve_2;
 
 /// # Panics
 fn solve<const TARGET: u8>(
