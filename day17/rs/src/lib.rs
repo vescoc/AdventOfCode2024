@@ -6,7 +6,7 @@ use core::fmt::Write;
 use heapless::{String as HLString, Vec as HLVec};
 
 pub type String = HLString<32>;
-type Vec<T> = HLVec<T, 64>;
+type Vec<T> = HLVec<T, 128>;
 
 #[cfg(feature = "input")]
 use lazy_static::lazy_static;
