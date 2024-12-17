@@ -1,19 +1,24 @@
 #![no_std]
 #![allow(clippy::must_use_candidate)]
 
-#[cfg(not(target_family = "wasm"))]
+#[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
 use heapless::Vec as HLVec;
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
 type Vec<T> = HLVec<T, 16>;
 type Stack<T> = HLVec<T, 32>;
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub const INPUT: &str = "";
 
 trait Part {
     const OPS: &[u32];
@@ -30,10 +35,10 @@ impl Part for Part2 {
 }
 
 fn solve<P: Part>(input: &str) -> u64 {
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(feature = "parallel")]
     let lines = input.par_lines();
 
-    #[cfg(target_family = "wasm")]
+    #[cfg(not(feature = "parallel"))]
     let lines = input.lines();
 
     lines
@@ -101,15 +106,16 @@ pub fn solve_1(input: &str) -> u64 {
 }
 
 /// # Panics
-#[allow(clippy::cast_possible_truncation)]
 pub fn solve_2(input: &str) -> u64 {
     solve::<Part2>(input)
 }
 
+#[cfg(feature = "input")]
 pub fn part_1() -> u64 {
     solve_1(&INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> u64 {
     solve_2(&INPUT)
 }

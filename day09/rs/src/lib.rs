@@ -3,11 +3,16 @@
 use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
+#[cfg(feature = "input")]
 use lazy_static::lazy_static;
 
+#[cfg(feature = "input")]
 lazy_static! {
     pub static ref INPUT: &'static str = include_str!("../../input");
 }
+
+#[cfg(not(feature = "input"))]
+pub const INPUT: &str = "";
 
 /// # Panics
 pub fn solve_1(input: &str) -> u64 {
@@ -175,10 +180,12 @@ pub fn solve_2(input: &str) -> u64 {
         .sum()
 }
 
+#[cfg(feature = "input")]
 pub fn part_1() -> u64 {
     solve_1(&INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> u64 {
     solve_2(&INPUT)
 }

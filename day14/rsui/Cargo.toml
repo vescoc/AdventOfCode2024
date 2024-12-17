@@ -8,7 +8,7 @@ year = 2024
 day = 14
 
 [dependencies]
-day14 = { path = "../rs" }
+day14 = { path = "../rs", default-features = false }
 instant = { version = "0.1", features = ["wasm-bindgen"] }
 wasm-bindgen = "0.2.99"
 
