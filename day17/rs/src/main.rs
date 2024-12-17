@@ -19,9 +19,9 @@ fn main() {
 #[cfg(not(feature = "input"))]
 fn main() {
     use std::io;
-    
+
     let input = io::read_to_string(io::stdin()).expect("cannot read input");
-    
+
     let now = Instant::now();
 
     println!("part 1: {}", day17::solve_1(&input));
