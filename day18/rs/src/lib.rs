@@ -1,6 +1,9 @@
+#![no_std]
 #![allow(clippy::must_use_candidate)]
 
-use heapless::Deque as HLDeque;
+use core::fmt::Write;
+
+use heapless::{Deque as HLDeque, String as HLString, Vec as HLVec};
 
 use bitset::BitSet;
 
@@ -15,14 +18,21 @@ lazy_static! {
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
 
-const PUZZLE_WIDTH: usize = 71;
-const PUZZLE_HEIGHT: usize = 71;
-const BITSET_SIZE: usize = BitSet::with_capacity(PUZZLE_WIDTH * PUZZLE_HEIGHT);
+pub const PUZZLE_WIDTH: usize = 71;
+pub const PUZZLE_HEIGHT: usize = 71;
+pub const BITSET_SIZE: usize = BitSet::with_capacity(PUZZLE_WIDTH * PUZZLE_HEIGHT);
 
 type Deque<T> = HLDeque<T, { PUZZLE_WIDTH * 2 }>;
+type Vec<T> = HLVec<T, { PUZZLE_WIDTH * PUZZLE_HEIGHT }>;
+type String = HLString<16>;
 
 /// # Panics
-fn solve_1_gen<const WIDTH: usize, const HEIGHT: usize, const TAKE: usize, const SIZE: usize>(
+pub fn solve_1_bfs<
+    const WIDTH: usize,
+    const HEIGHT: usize,
+    const TAKE: usize,
+    const SIZE: usize,
+>(
     input: &str,
 ) -> usize {
     let mut map = [[b'.'; WIDTH]; HEIGHT];
@@ -66,83 +76,135 @@ fn solve_1_gen<const WIDTH: usize, const HEIGHT: usize, const TAKE: usize, const
 }
 
 /// # Panics
-fn solve_2_gen<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize>(input: &str) -> String {
-    use core::fmt;
-
-    struct Info<T, K, const S: usize>((usize, usize), usize, Box<BitSet<T, K, S>>);
-
-    impl<T, K, const S: usize> fmt::Debug for Info<T, K, S> {
-        fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-            write!(f, "Info({:?}, {}, [{}]", self.0, self.1, self.2.len())
-        }
-    }
-
+pub fn bfs<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize>(
+    map: &[[u8; WIDTH]; HEIGHT],
+) -> bool {
     let key = |(x, y): &(usize, usize)| y * WIDTH + x;
 
-    let mut last_found_path: Option<Box<BitSet<(usize, usize), _, SIZE>>> = None;
+    let mut visited = BitSet::<_, _, SIZE>::new(key);
+    visited.insert((0, 0)).unwrap();
 
-    let mut map = [[b'.'; WIDTH]; HEIGHT];
-    for (x, y) in input.lines().map(|line| {
-        let (x, y) = line.split_once(',').unwrap();
-        (x.parse::<usize>().unwrap(), y.parse::<usize>().unwrap())
-    }) {
-        map[y][x] = b'#';
+    let mut queue = Deque::new();
+    queue.push_back((0usize, 0usize)).unwrap();
 
-        let mut found = false;
-        if last_found_path
-            .as_ref()
-            .map_or(true, |set| set.contains(&(x, y)).unwrap())
-        {
-            let mut path = BitSet::<_, _, SIZE>::new(key);
-            path.insert((0, 0)).unwrap();
+    while let Some((x, y)) = queue.pop_front() {
+        for (dx, dy) in [(0, 1), (1, 0), (0, -1), (-1, 0)] {
+            match (x.checked_add_signed(dx), y.checked_add_signed(dy)) {
+                (Some(x), Some(y))
+                    if matches!(map.get(y).and_then(|row| row.get(x)), Some(b'.')) =>
+                {
+                    if x == WIDTH - 1 && y == HEIGHT - 1 {
+                        return true;
+                    }
 
-            let mut visited = BitSet::<_, _, SIZE>::new(key);
-            visited.insert((0, 0)).unwrap();
-
-            let mut queue = Deque::new();
-            queue.push_back(Info((0, 0), 0, Box::new(path))).unwrap();
-
-            while let Some(Info((x, y), steps, path)) = queue.pop_front() {
-                for (dx, dy) in [(0, 1), (0, -1), (1, 0), (-1, 0)] {
-                    match (x.checked_add_signed(dx), y.checked_add_signed(dy)) {
-                        (Some(x), Some(y))
-                            if matches!(map.get(y).and_then(|row| row.get(x)), Some(b'.')) =>
-                        {
-                            if !visited.insert((x, y)).unwrap() {
-                                let mut path = path.clone();
-                                path.insert((x, y)).unwrap();
-
-                                if x == WIDTH - 1 && y == HEIGHT - 1 {
-                                    last_found_path = Some(path);
-                                    found = true;
-                                    break;
-                                }
-
-                                queue.push_back(Info((x, y), steps + 1, path)).unwrap();
-                            }
-                        }
-                        _ => {}
+                    if !visited.insert((x, y)).unwrap() {
+                        queue.push_back((x, y)).unwrap();
                     }
                 }
+                _ => {}
             }
-        } else {
-            found = true;
-        }
-
-        if !found {
-            return format!("{x},{y}");
         }
     }
 
-    unreachable!()
+    false
+}
+
+/// # Panics
+pub fn dfs<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize>(
+    map: &[[u8; WIDTH]; HEIGHT],
+) -> bool {
+    let key = |(x, y): &(usize, usize)| y * WIDTH + x;
+
+    let mut visited = BitSet::<_, _, SIZE>::new(key);
+    visited.insert((0, 0)).unwrap();
+
+    let mut queue = Vec::new();
+    queue.push((0usize, 0usize)).unwrap();
+
+    while let Some((x, y)) = queue.pop() {
+        for (dx, dy) in [(0, 1), (1, 0), (0, -1), (-1, 0)] {
+            match (x.checked_add_signed(dx), y.checked_add_signed(dy)) {
+                (Some(x), Some(y))
+                    if matches!(map.get(y).and_then(|row| row.get(x)), Some(b'.')) =>
+                {
+                    if x == WIDTH - 1 && y == HEIGHT - 1 {
+                        return true;
+                    }
+
+                    if !visited.insert((x, y)).unwrap() {
+                        queue.push((x, y)).unwrap();
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    false
+}
+
+/// # Panics
+pub fn solve_2_bs<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize, const CUT: usize>(
+    input: &str,
+    search: impl Fn(&[[u8; WIDTH]; HEIGHT]) -> bool,
+) -> String {
+    let drops = input
+        .lines()
+        .map(|line| {
+            let (x, y) = line.split_once(',').unwrap();
+            (x.parse::<usize>().unwrap(), y.parse::<usize>().unwrap())
+        })
+        .collect::<Vec<_>>();
+
+    let mut min = CUT;
+    let mut max = drops.len();
+    let mut middle = (min + max) / 2;
+
+    let mut grid = [[b'.'; WIDTH]; HEIGHT];
+    for (x, y) in drops.iter().take(middle).copied() {
+        grid[y][x] = b'#';
+    }
+
+    while min != middle {
+        if search(&grid) {
+            let new_middle = (middle + max) / 2;
+            for (x, y) in drops.iter().skip(middle).take(new_middle - middle).copied() {
+                grid[y][x] = b'#';
+            }
+            min = middle;
+            middle = new_middle;
+        } else {
+            let new_middle = (min + middle) / 2;
+            for (x, y) in drops
+                .iter()
+                .skip(new_middle)
+                .take(middle - new_middle)
+                .copied()
+            {
+                grid[y][x] = b'.';
+            }
+            max = middle;
+            middle = new_middle;
+        }
+    }
+
+    let (x, y) = drops[middle];
+
+    let mut result = String::new();
+    write!(&mut result, "{x},{y}").unwrap();
+
+    result
 }
 
 pub fn solve_1(input: &str) -> usize {
-    solve_1_gen::<PUZZLE_WIDTH, PUZZLE_HEIGHT, 1024, BITSET_SIZE>(input)
+    solve_1_bfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, 1024, BITSET_SIZE>(input)
 }
 
 pub fn solve_2(input: &str) -> String {
-    solve_2_gen::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>(input)
+    solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 1024>(
+        input,
+        dfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>,
+    )
 }
 
 #[cfg(feature = "input")]
@@ -192,16 +254,30 @@ mod tests {
     #[test]
     fn same_results_1() {
         assert_eq!(
-            solve_1_gen::<7, 7, 12, { BitSet::with_capacity(7 * 7) }>(&INPUT),
+            solve_1_bfs::<7, 7, 12, { BitSet::with_capacity(7 * 7) }>(&INPUT),
             22
         );
     }
 
     #[test]
-    fn same_results_2() {
+    fn same_results_2_bs_dfs() {
         assert_eq!(
-            solve_2_gen::<7, 7, { BitSet::with_capacity(7 * 7) }>(&INPUT),
-            "6,1".to_string()
+            &solve_2_bs::<7, 7, { BitSet::with_capacity(7 * 7) }, 0>(
+                &INPUT,
+                dfs::<7, 7, { BitSet::with_capacity(7 * 7) }>
+            ),
+            &"6,1"
+        );
+    }
+
+    #[test]
+    fn same_results_2_bs_bfs() {
+        assert_eq!(
+            &solve_2_bs::<7, 7, { BitSet::with_capacity(7 * 7) }, 0>(
+                &INPUT,
+                bfs::<7, 7, { BitSet::with_capacity(7 * 7) }>
+            ),
+            &"6,1"
         );
     }
 }

@@ -4,7 +4,44 @@ use day18::*;
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("part 1", |b| b.iter(part_1));
-    c.bench_function("part 2", |b| b.iter(part_2));
+
+    let mut group = c.benchmark_group("part 2 1024");
+    group.bench_function("bs/bfs", |b| {
+        b.iter(|| {
+            solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 1024>(
+                &INPUT,
+                bfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>,
+            )
+        })
+    });
+    group.bench_function("bs/dfs", |b| {
+        b.iter(|| {
+            solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 1024>(
+                &INPUT,
+                dfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>,
+            )
+        })
+    });
+    group.finish();
+
+    let mut group = c.benchmark_group("part 2 0");
+    group.bench_function("bs/bfs", |b| {
+        b.iter(|| {
+            solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 0>(
+                &INPUT,
+                bfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>,
+            )
+        })
+    });
+    group.bench_function("bs/dfs", |b| {
+        b.iter(|| {
+            solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 0>(
+                &INPUT,
+                dfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>,
+            )
+        })
+    });
+    group.finish();
 }
 
 criterion_group!(benches, criterion_benchmark);
