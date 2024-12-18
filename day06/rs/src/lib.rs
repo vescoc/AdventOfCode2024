@@ -164,7 +164,7 @@ pub fn solve_2_par(input: &str) -> usize {
             None
         } else {
             Some((
-                visited_pd,
+                visited_pd.clone(),
                 current_position,
                 (next_facing + 1) % 4,
                 next_position,
@@ -259,7 +259,11 @@ pub fn solve_2_sync(input: &str) -> usize {
     }
 }
 
+#[cfg(not(feature = "parallel"))]
 pub use solve_2_sync as solve_2;
+
+#[cfg(feature = "parallel")]
+pub use solve_2_par as solve_2;
 
 #[cfg(feature = "input")]
 pub fn part_1() -> usize {

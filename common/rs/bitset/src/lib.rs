@@ -5,7 +5,8 @@ const BITS: usize = mem::size_of::<u128>() * 8;
 #[derive(Debug)]
 pub struct Error;
 
-#[derive(Copy, Clone)]
+// Cannot be copy: this structure can be too heavy
+#[derive(Clone)]
 pub struct BitSet<T, K, const SIZE: usize> {
     data: [u128; SIZE],
     key: K,
@@ -77,10 +78,10 @@ impl<T, K: Fn(&T) -> usize, const SIZE: usize> BitSet<T, K, SIZE> {
 
 impl<T, K, const SIZE: usize> BitSet<T, K, SIZE>
 where
-    K: Fn(&T) -> usize + Copy,
+    K: Fn(&T) -> usize + Clone,
 {
     pub fn key(&self) -> K {
-        self.key
+        self.key.clone()
     }
 }
 
