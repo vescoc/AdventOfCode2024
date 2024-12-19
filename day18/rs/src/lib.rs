@@ -22,8 +22,9 @@ pub const PUZZLE_WIDTH: usize = 71;
 pub const PUZZLE_HEIGHT: usize = 71;
 pub const BITSET_SIZE: usize = BitSet::with_capacity(PUZZLE_WIDTH * PUZZLE_HEIGHT);
 
-type Deque<T> = HLDeque<T, { PUZZLE_WIDTH * 2 }>;
+type Deque<T> = HLDeque<T, { PUZZLE_WIDTH * 4 }>;
 type Vec<T> = HLVec<T, { PUZZLE_WIDTH * PUZZLE_HEIGHT }>;
+type Drops<T> = HLVec<T, 32000>;
 type String = HLString<16>;
 
 /// # Panics
@@ -154,7 +155,7 @@ pub fn solve_2_bs<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize, co
             let (x, y) = line.split_once(',').unwrap();
             (x.parse::<usize>().unwrap(), y.parse::<usize>().unwrap())
         })
-        .collect::<Vec<_>>();
+        .collect::<Drops<_>>();
 
     let mut min = CUT;
     let mut max = drops.len();
