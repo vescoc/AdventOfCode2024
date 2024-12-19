@@ -66,13 +66,19 @@ impl<T, K: Fn(&T) -> usize, const SIZE: usize> BitSet<T, K, SIZE> {
         Ok(self.data.get(i).ok_or(Error)? & (1 << b) != 0)
     }
 
-    pub fn remove(&mut self, idx: &T) -> Result<(), Error> {
+    pub fn remove(&mut self, idx: &T) -> Result<bool, Error> {
         let idx = (self.key)(idx);
         let (i, b) = (idx / BITS, idx % BITS);
 
-        *self.data.get_mut(i).ok_or(Error)? &= !(1 << b);
+        let data = self.data.get_mut(i).ok_or(Error)?;
+        
+        let mask = 1 << b;
+        
+        let result = *data & mask != 0;
+        
+        *data &= !mask;
 
-        Ok(())
+        Ok(result)
     }
 }
 

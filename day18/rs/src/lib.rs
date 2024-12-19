@@ -196,6 +196,118 @@ pub fn solve_2_bs<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize, co
     result
 }
 
+/// # Panics
+pub fn solve_2_bru<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize>(
+    input: &str,
+) -> String {
+    let key = |&(x, y): &(usize, usize)| y * WIDTH + x;
+
+    let mut blue = BitSet::<(usize, usize), _, SIZE>::new(key);
+    let mut red = BitSet::<(usize, usize), _, SIZE>::new(key);
+    let mut uncolored = BitSet::<(usize, usize), _, SIZE>::new(key);
+
+    let bfs = |uncolored: &mut BitSet<_, _, SIZE>,
+               colored: &mut BitSet<_, _, SIZE>,
+               &(x, y): &(usize, usize)| {
+        let mut queue = Deque::new();
+        queue.push_back((x, y)).unwrap();
+
+        while let Some((x, y)) = queue.pop_front() {
+            colored.insert((x, y)).unwrap();
+
+            for (dx, dy) in [
+                (-1, -1),
+                (-1, 0),
+                (-1, 1),
+                (0, -1),
+                (0, 1),
+                (1, -1),
+                (1, 0),
+                (1, 1),
+            ] {
+                match (x.checked_add_signed(dx), y.checked_add_signed(dy)) {
+                    (Some(x), Some(y)) if x < WIDTH && y < HEIGHT => {
+                        if uncolored.remove(&(x, y)).unwrap() && !colored.insert((x, y)).unwrap() {
+                            queue.push_back((x, y)).unwrap();
+                        }
+                    }
+                    _ => {}
+                }
+            }
+        }
+    };
+
+    let check = |colored: &BitSet<_, _, SIZE>, &(x, y): &(usize, usize)| {
+        [
+            (-1, -1),
+            (-1, 0),
+            (-1, 1),
+            (0, -1),
+            (0, 1),
+            (1, -1),
+            (1, 0),
+            (1, 1),
+        ]
+        .into_iter()
+        .any(
+            |(dx, dy)| match (x.checked_add_signed(dx), y.checked_add_signed(dy)) {
+                (Some(x), Some(y)) if x < WIDTH && y < HEIGHT => colored.contains(&(x, y)).unwrap(),
+                _ => false,
+            },
+        )
+    };
+
+    let make_result = |&(x, y): &(usize, usize)| {
+        let mut result = String::new();
+        write!(&mut result, "{x},{y}").unwrap();
+        result
+    };
+
+    for (x, y) in input.lines().map(|line| {
+        let (x, y) = line.split_once(',').unwrap();
+        (x.parse::<usize>().unwrap(), y.parse::<usize>().unwrap())
+    }) {
+        assert!((x, y) != (0, 0) && (x, y) != (WIDTH - 1, HEIGHT - 1));
+
+        if x == 0 || y == HEIGHT - 1 {
+            if check(&red, &(x, y)) {
+                return make_result(&(x, y));
+            }
+
+            bfs(&mut uncolored, &mut blue, &(x, y));
+
+            continue;
+        }
+
+        if x == WIDTH - 1 || y == 0 {
+            if check(&blue, &(x, y)) {
+                return make_result(&(x, y));
+            }
+
+            bfs(&mut uncolored, &mut red, &(x, y));
+
+            continue;
+        }
+
+        match (check(&blue, &(x, y)), check(&red, &(x, y))) {
+            (true, true) => {
+                return make_result(&(x, y));
+            }
+            (true, false) => {
+                bfs(&mut uncolored, &mut blue, &(x, y));
+            }
+            (false, true) => {
+                bfs(&mut uncolored, &mut red, &(x, y));
+            }
+            (false, false) => {
+                uncolored.insert((x, y)).unwrap();
+            }
+        }
+    }
+
+    unreachable!()
+}
+
 pub fn solve_1(input: &str) -> usize {
     solve_1_bfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, 1024, BITSET_SIZE>(input)
 }
@@ -277,6 +389,14 @@ mod tests {
                 &INPUT,
                 bfs::<7, 7, { BitSet::with_capacity(7 * 7) }>
             ),
+            &"6,1"
+        );
+    }
+
+    #[test]
+    fn same_results_2_bru() {
+        assert_eq!(
+            &solve_2_bru::<7, 7, { BitSet::with_capacity(7 * 7) }>(&INPUT),
             &"6,1"
         );
     }

@@ -41,6 +41,9 @@ pub fn criterion_benchmark(c: &mut Criterion) {
             )
         })
     });
+    group.bench_function("bru", |b| {
+        b.iter(|| solve_2_bru::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>(&INPUT))
+    });
     group.finish();
 }
 
