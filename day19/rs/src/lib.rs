@@ -21,8 +21,64 @@ lazy_static! {
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
 
-/// # Panics
+/// Panics
 pub fn solve_1(input: &str) -> usize {
+    solve_1_r(input)
+}
+
+pub fn solve_2(input: &str) -> u64 {
+    solve_2_r(input)
+}
+
+/// # Panics
+pub fn solve_1_pd(input: &str) -> usize {
+    let (patterns, designs) = input.split_once("\n\n").unwrap();
+
+    let patterns = patterns.split(", ").collect::<Vec<_>>();
+
+    let have_options = |design: &str| {
+        let mut options = [0u64; 64];
+        for pattern in &patterns {
+            if design.starts_with(pattern) {
+                options[pattern.len()] += 1;
+            }
+        }
+
+        for i in 1..=design.len() {
+            let current = options[i];
+            if current == 0 {
+                continue;
+            }
+
+            for pattern in &patterns {
+                let len = i + pattern.len();
+                if len > design.len() {
+                    continue;
+                }
+
+                if design[i..].starts_with(pattern) {
+                    if len == design.len() {
+                        return true;
+                    }
+                    options[len] += current;
+                }
+            }
+        }
+
+        false
+    };
+
+    #[cfg(feature = "parallel")]
+    let lines = designs.par_lines();
+
+    #[cfg(not(feature = "parallel"))]
+    let lines = designs.lines();
+
+    lines.filter(|&design| have_options(design)).count()
+}
+
+/// # Panics
+pub fn solve_1_r(input: &str) -> usize {
     fn is_match<'a>(memoize: &mut Set<&'a str>, patterns: &[&str], design: &'a str) -> bool {
         if design.is_empty() {
             return true;
@@ -63,8 +119,48 @@ pub fn solve_1(input: &str) -> usize {
 }
 
 /// # Panics
-pub fn solve_2(input: &str) -> usize {
-    fn ways<'a>(memoize: &mut Map<&'a str, usize>, patterns: &[&str], design: &'a str) -> usize {
+pub fn solve_2_r(input: &str) -> u64 {
+    let (patterns, designs) = input.split_once("\n\n").unwrap();
+
+    let patterns = patterns.split(", ").collect::<Vec<_>>();
+
+    let count_options = |design: &str| {
+        let mut options = [0u64; 64];
+        for pattern in &patterns {
+            if design.starts_with(pattern) {
+                options[pattern.len()] += 1;
+            }
+        }
+
+        for i in 1..=design.len() {
+            let current = options[i];
+            if current == 0 {
+                continue;
+            }
+
+            for pattern in &patterns {
+                let len = i + pattern.len();
+                if len <= design.len() && design[i..].starts_with(pattern) {
+                    options[len] += current;
+                }
+            }
+        }
+
+        options[design.len()]
+    };
+
+    #[cfg(feature = "parallel")]
+    let lines = designs.par_lines();
+
+    #[cfg(not(feature = "parallel"))]
+    let lines = designs.lines();
+
+    lines.map(count_options).sum()
+}
+
+/// # Panics
+pub fn solve_2_pd(input: &str) -> u64 {
+    fn ways<'a>(memoize: &mut Map<&'a str, u64>, patterns: &[&str], design: &'a str) -> u64 {
         if design.is_empty() {
             return 1;
         }
@@ -108,7 +204,7 @@ pub fn part_1() -> usize {
 }
 
 #[cfg(feature = "input")]
-pub fn part_2() -> usize {
+pub fn part_2() -> u64 {
     solve_2(&INPUT)
 }
 
@@ -132,12 +228,34 @@ bbrgwb"#;
     }
 
     #[test]
-    fn same_results_1() {
-        assert_eq!(solve_1(&INPUT), 6);
+    fn same_results_1_r() {
+        assert_eq!(solve_1_r(&INPUT), 6);
     }
 
     #[test]
-    fn same_results_2() {
-        assert_eq!(solve_2(&INPUT), 16);
+    fn same_results_1_pd() {
+        assert_eq!(solve_1_pd(&INPUT), 6);
+    }
+
+    #[cfg(feature = "input")]
+    #[test]
+    fn same_results_1_r_vs_pd() {
+        assert_eq!(solve_1_r(&super::INPUT), solve_1_pd(&super::INPUT));
+    }
+
+    #[test]
+    fn same_results_2_r() {
+        assert_eq!(solve_2_r(&INPUT), 16);
+    }
+
+    #[test]
+    fn same_results_2_pd() {
+        assert_eq!(solve_2_pd(&INPUT), 16);
+    }
+
+    #[cfg(feature = "input")]
+    #[test]
+    fn same_results_2_r_vs_pd() {
+        assert_eq!(solve_2_r(&super::INPUT), solve_2_pd(&super::INPUT));
     }
 }
