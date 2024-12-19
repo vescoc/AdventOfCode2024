@@ -298,6 +298,7 @@ dependencies = [
  "criterion",
  "heapless",
  "lazy_static",
+ "rayon",
 ]
 
 [[package]]

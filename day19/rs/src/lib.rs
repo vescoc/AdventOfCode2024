@@ -3,6 +3,9 @@
 
 use heapless::{FnvIndexMap, FnvIndexSet, Vec as HLVec};
 
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
+
 type Set<T> = FnvIndexSet<T, 64>;
 type Map<K, V> = FnvIndexMap<K, V, 64>;
 type Vec<T> = HLVec<T, 4096>;
@@ -48,8 +51,13 @@ pub fn solve_1(input: &str) -> usize {
 
     let patterns = patterns.split(", ").collect::<Vec<_>>();
 
-    designs
-        .lines()
+    #[cfg(feature = "parallel")]
+    let lines = designs.par_lines();
+
+    #[cfg(not(feature = "parallel"))]
+    let lines = designs.lines();
+
+    lines
         .filter(|&design| is_match(&mut Set::new(), &patterns, design))
         .count()
 }
@@ -83,8 +91,13 @@ pub fn solve_2(input: &str) -> usize {
 
     let patterns = patterns.split(", ").collect::<Vec<_>>();
 
-    designs
-        .lines()
+    #[cfg(feature = "parallel")]
+    let lines = designs.par_lines();
+
+    #[cfg(not(feature = "parallel"))]
+    let lines = designs.lines();
+
+    lines
         .map(|design| ways(&mut Map::new(), &patterns, design))
         .sum()
 }
