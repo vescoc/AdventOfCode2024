@@ -3,8 +3,15 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use day20::*;
 
 pub fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("part 1", |b| b.iter(part_1));
-    c.bench_function("part 2", |b| b.iter(part_2));
+    let mut group = c.benchmark_group("part 1");
+    group.bench_function("m", |b| b.iter(|| solve_m::<100, 2>(&INPUT)));
+    group.bench_function("v", |b| b.iter(|| solve_v::<100, 2>(&INPUT)));
+    group.finish();
+
+    let mut group = c.benchmark_group("part 2");
+    group.bench_function("m", |b| b.iter(|| solve_m::<100, 20>(&INPUT)));
+    group.bench_function("v", |b| b.iter(|| solve_v::<100, 20>(&INPUT)));
+    group.finish();
 }
 
 criterion_group!(benches, criterion_benchmark);
