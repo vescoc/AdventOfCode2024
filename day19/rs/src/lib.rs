@@ -31,7 +31,7 @@ pub fn solve_2(input: &str) -> u64 {
 }
 
 /// # Panics
-pub fn solve_1_pd(input: &str) -> usize {
+pub fn solve_1_dp(input: &str) -> usize {
     let (patterns, designs) = input.split_once("\n\n").unwrap();
 
     let patterns = patterns.split(", ").collect::<Vec<_>>();
@@ -159,7 +159,7 @@ pub fn solve_2_r(input: &str) -> u64 {
 }
 
 /// # Panics
-pub fn solve_2_pd(input: &str) -> u64 {
+pub fn solve_2_dp(input: &str) -> u64 {
     fn ways<'a>(memoize: &mut Map<&'a str, u64>, patterns: &[&str], design: &'a str) -> u64 {
         if design.is_empty() {
             return 1;
@@ -233,14 +233,14 @@ bbrgwb"#;
     }
 
     #[test]
-    fn same_results_1_pd() {
-        assert_eq!(solve_1_pd(&INPUT), 6);
+    fn same_results_1_dp() {
+        assert_eq!(solve_1_dp(&INPUT), 6);
     }
 
     #[cfg(feature = "input")]
     #[test]
-    fn same_results_1_r_vs_pd() {
-        assert_eq!(solve_1_r(&super::INPUT), solve_1_pd(&super::INPUT));
+    fn same_results_1_r_vs_dp() {
+        assert_eq!(solve_1_r(&super::INPUT), solve_1_dp(&super::INPUT));
     }
 
     #[test]
@@ -249,13 +249,13 @@ bbrgwb"#;
     }
 
     #[test]
-    fn same_results_2_pd() {
-        assert_eq!(solve_2_pd(&INPUT), 16);
+    fn same_results_2_dp() {
+        assert_eq!(solve_2_dp(&INPUT), 16);
     }
 
     #[cfg(feature = "input")]
     #[test]
-    fn same_results_2_r_vs_pd() {
-        assert_eq!(solve_2_r(&super::INPUT), solve_2_pd(&super::INPUT));
+    fn same_results_2_r_vs_dp() {
+        assert_eq!(solve_2_r(&super::INPUT), solve_2_dp(&super::INPUT));
     }
 }
