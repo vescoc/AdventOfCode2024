@@ -1,17 +1,33 @@
 use std::time::Instant;
 
-use day20::{part_1, part_2};
-
+#[cfg(feature = "input")]
 fn main() {
     let now = Instant::now();
 
-    println!("part 1: {}", part_1());
-    println!("part 2: {}", part_2());
+    println!("part 1: {}", day20::part_1());
+    println!("part 2: {}", day20::part_2());
 
     let elapsed = now.elapsed();
     println!(
-        "elapsed: {}ms ({}ns)",
+        "elapsed: {}ms ({}us, {}ns)",
         elapsed.as_millis(),
+        elapsed.as_micros(),
+        elapsed.as_nanos()
+    );
+}
+
+#[cfg(not(feature = "input"))]
+fn main() {
+    let now = Instant::now();
+
+    println!("part 1: {}", day20::solve_1(&INPUT));
+    println!("part 2: {}", day20::solve_2(&INPUT));
+
+    let elapsed = now.elapsed();
+    println!(
+        "elapsed: {}ms ({}us, {}ns)",
+        elapsed.as_millis(),
+        elapsed.as_micros(),
         elapsed.as_nanos()
     );
 }
