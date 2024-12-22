@@ -8,8 +8,11 @@ year = 2024
 day = 22
 
 [dependencies]
-day22 = { path = "../rs" }
+day22 = { path = "../rs", default-features = false }
 ui = { path = "../../common/rs/ui", features = ["wasm-bindgen"]}
+
+[build-dependencies]
+aoc = { path = "../../common/rs/aoc" }
 
 [dependencies.yew]
 version = "0.21"
