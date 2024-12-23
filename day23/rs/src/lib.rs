@@ -1,5 +1,8 @@
-#![no_std]
+//#![no_std]
 #![allow(clippy::must_use_candidate)]
+
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
 
 use heapless::{FnvIndexMap, FnvIndexSet, String as HLString, Vec as HLVec};
 
@@ -52,27 +55,29 @@ pub fn solve_1(input: &str) -> usize {
         }
     }
 
-    let mut triangles = Set::new();
-    for &t_id in &ts {
-        for a_id in edges[t_id]
-            .iter()
-            .enumerate()
-            .filter_map(|(i, &v)| if v { Some(i) } else { None })
-        {
-            for b_id in edges[t_id]
+    let edges = &edges; // !!! borrow checker + move :'(
+    ts.iter()
+        .flat_map(|&t_id| {
+            edges[t_id]
+                .iter()
+                .enumerate()
+                .filter_map(move |(a_id, &v)| if v { Some((t_id, a_id)) } else { None })
+        })
+        .flat_map(|(t_id, a_id)| {
+            edges[t_id]
                 .iter()
                 .enumerate()
                 .skip(a_id + 1)
-                .filter_map(|(i, &v)| if v { Some(i) } else { None })
-            {
-                if edges[a_id][b_id] {
-                    triangles.insert(set(&[t_id, a_id, b_id])).unwrap();
-                }
-            }
-        }
-    }
-
-    triangles.len()
+                .filter_map(move |(b_id, &v)| {
+                    if v && edges[a_id][b_id] {
+                        Some(set(&[t_id, a_id, b_id]))
+                    } else {
+                        None
+                    }
+                })
+        })
+        .collect::<Set<_>>()
+        .len()
 }
 
 /// # Panics
@@ -97,37 +102,39 @@ pub fn solve_2(input: &str) -> String {
         edges[id_b][id_a] = true;
     }
 
-    let mut best_group: Option<Vec<usize>> = None;
-    for &start_id in &nodes {
-        let mut group = Vec::try_from([start_id].as_slice()).unwrap();
-        for candidate_id in
-            edges[start_id]
-                .iter()
-                .enumerate()
-                .filter_map(|(id, &v)| if v { Some(id) } else { None })
-        {
-            if group.iter().all(|&id| edges[id][candidate_id]) {
-                group.push(candidate_id).unwrap();
-            }
-        }
+    #[cfg(feature = "parallel")]
+    let nodes = nodes.iter().par_bridge();
 
-        if let Some(best_group) = best_group.as_mut() {
-            if group.len() > best_group.len() {
-                *best_group = group;
+    #[cfg(not(feature = "parallel"))]
+    let nodes = nodes.iter();
+
+    let best_group = nodes
+        .map(|&start_id| {
+            let mut group = Vec::try_from([start_id].as_slice()).unwrap();
+            for candidate_id in
+                edges[start_id]
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(id, &v)| if v { Some(id) } else { None })
+            {
+                if group.iter().all(|&id| edges[id][candidate_id]) {
+                    group.push(candidate_id).unwrap();
+                }
             }
-        } else {
-            best_group = Some(group);
-        }
-    }
+
+            group
+        })
+        .max_by(|a, b| a.len().cmp(&b.len()))
+        .unwrap();
 
     let mut group = Vec::new();
-    for node in best_group.unwrap().into_iter().map(|id| id2node[&id]) {
+    for node in best_group.into_iter().map(|id| id2node[&id]) {
         group.push(node).unwrap();
     }
     group.sort_unstable();
 
     let mut result = String::new();
-    for node in group.iter().take(result.len() - 1) {
+    for node in group.iter().take(group.len() - 1) {
         result.push_str(node).unwrap();
         result.push(',').unwrap();
     }
@@ -185,11 +192,11 @@ td-yn";
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT), 7);
+        assert_eq!(solve_1(INPUT), 7);
     }
 
     #[test]
     fn same_results_2() {
-        assert_eq!(&solve_2(&INPUT), &"co,de,ka,ta");
+        assert_eq!(&solve_2(INPUT), &"co,de,ka,ta");
     }
 }
