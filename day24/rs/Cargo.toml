@@ -3,12 +3,17 @@ name = "day24"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = ["input"]
+
+input = []
+
 [package.metadata.aoc]
 year = 2024
 day = 24
 
 [dependencies]
-lazy_static = "1.4"
+heapless = "0.8.0"
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
@@ -19,3 +24,10 @@ aoc = { path = "../../common/rs/aoc" }
 [[bench]]
 name = "bench"
 harness = false
+
+[lints.clippy]
+pedantic = "deny"
+
+[profile.release]
+debug = true
+codegen-units = 1
