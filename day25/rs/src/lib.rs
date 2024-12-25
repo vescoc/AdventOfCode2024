@@ -25,14 +25,18 @@ pub fn solve_1(input: &str) -> usize {
             &mut keys
         };
 
-        let mut acc = 0u64;
-        part.as_bytes().chunks(6).skip(1).take(5).for_each(|row| {
-            for (i, &c) in row.iter().take(5).enumerate() {
-                if c == b'#' {
-                    acc += 1 << (8 * i);
+        let acc = part.as_bytes().chunks(6).skip(1).take(5).enumerate().fold(
+            0u64,
+            |mut acc, (j, row)| {
+                for (i, &c) in row.iter().take(5).enumerate() {
+                    if c == b'#' {
+                        acc |= 1 << (5 * i + j);
+                    }
                 }
-            }
-        });
+                acc
+            },
+        );
+
         list.push(acc).unwrap();
     }
 
@@ -42,16 +46,8 @@ pub fn solve_1(input: &str) -> usize {
     #[cfg(not(feature = "parallel"))]
     let keys = keys.iter();
 
-    keys.map(|&key| {
-        locks
-            .iter()
-            .filter(|&lock| {
-                let candidate = key + lock;
-                (0..5).all(|i| (candidate & (0xf << (8 * i))) <= (0x5 << (8 * i)))
-            })
-            .count()
-    })
-    .sum()
+    keys.map(|&key| locks.iter().filter(|&lock| key & lock == 0).count())
+        .sum()
 }
 
 /// # Panics
