@@ -8,6 +8,7 @@ default = ["input", "parallel"]
 
 input = []
 parallel = ["dep:rayon"]
+simd = [] # requires +nightly
 
 [package.metadata.aoc]
 year = 2024
