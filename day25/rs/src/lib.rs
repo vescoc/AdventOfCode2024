@@ -1,6 +1,9 @@
 #![no_std]
 #![allow(clippy::must_use_candidate)]
 
+#[cfg(feature = "parallel")]
+use rayon::prelude::*;
+
 use heapless::{String as HLString, Vec as HLVec};
 
 #[cfg(feature = "input")]
@@ -13,7 +16,7 @@ type Vec<T> = HLVec<T, 1024>;
 type String = HLString<1>;
 
 /// # Panics
-pub fn solve_1(input: &str) -> u32 {
+pub fn solve_1(input: &str) -> usize {
     let (mut keys, mut locks) = (Vec::new(), Vec::new());
     for part in input.split("\n\n") {
         let list = if part.starts_with("#####") {
@@ -33,16 +36,22 @@ pub fn solve_1(input: &str) -> u32 {
         list.push(acc).unwrap();
     }
 
-    let mut total = 0;
-    for key in keys {
-        for lock in &locks {
-            let candidate = key + lock;
-            total +=
-                u32::from((0..5).all(|i| (candidate & (0xf << (8 * i))) <= (0x5 << (8 * i))));
-        }
-    }
+    #[cfg(feature = "parallel")]
+    let keys = keys.par_iter();
 
-    total
+    #[cfg(not(feature = "parallel"))]
+    let keys = keys.iter();
+
+    keys.map(|&key| {
+        locks
+            .iter()
+            .filter(|&lock| {
+                let candidate = key + lock;
+                (0..5).all(|i| (candidate & (0xf << (8 * i))) <= (0x5 << (8 * i)))
+            })
+            .count()
+    })
+    .sum()
 }
 
 /// # Panics
@@ -53,7 +62,7 @@ pub fn solve_2(_input: &str) -> String {
 }
 
 #[cfg(feature = "input")]
-pub fn part_1() -> u32 {
+pub fn part_1() -> usize {
     solve_1(INPUT)
 }
 
