@@ -36,8 +36,9 @@ pub fn solve_1(input: &str) -> u32 {
     let mut total = 0;
     for key in keys {
         for lock in &locks {
+            let candidate = key + lock;
             total +=
-                u32::from((0..5).all(|i| ((key + lock) & (0xf << (8 * i))) <= (0x5 << (8 * i))));
+                u32::from((0..5).all(|i| (candidate & (0xf << (8 * i))) <= (0x5 << (8 * i))));
         }
     }
 
