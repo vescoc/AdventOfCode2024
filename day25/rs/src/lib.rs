@@ -22,10 +22,12 @@ pub fn solve_1(input: &str) -> u32 {
             &mut keys
         };
 
-        let mut acc = [0; 5];
+        let mut acc = 0u64;
         part.as_bytes().chunks(6).skip(1).take(5).for_each(|row| {
-            for (v, &c) in acc.iter_mut().zip(row.iter().take(5)) {
-                *v += u8::from(c == b'#');
+            for (i, &c) in row.iter().take(5).enumerate() {
+                if c == b'#' {
+                    acc += 1 << (8 * i);
+                }
             }
         });
         list.push(acc).unwrap();
@@ -34,7 +36,8 @@ pub fn solve_1(input: &str) -> u32 {
     let mut total = 0;
     for key in keys {
         for lock in &locks {
-            total += u32::from(key.iter().zip(lock.iter()).all(|(a, b)| a + b <= 5));
+            total +=
+                u32::from((0..5).all(|i| ((key + lock) & (0xf << (8 * i))) <= (0x5 << (8 * i))));
         }
     }
 
