@@ -11,18 +11,13 @@ use nom::{
     IResult,
 };
 
-#[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
 enum Either<L, R> {
     Left(L),
     Right(R),
 }
 
 #[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -271,12 +266,10 @@ pub fn part_2() -> u32 {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT_1: &'static str =
-            r#"xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"#;
-        static ref INPUT_2: &'static str =
-            r#"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"#;
-    }
+    const INPUT_1: &str =
+        r#"xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"#;
+    const INPUT_2: &str =
+        r#"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"#;
 
     #[test]
     fn same_results_1_handmade() {

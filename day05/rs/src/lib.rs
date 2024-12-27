@@ -1,14 +1,10 @@
 #![no_std]
-
 #![allow(clippy::must_use_candidate)]
 
 use heapless::{Vec as HLVec, FnvIndexSet};
 
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
-
-#[cfg(feature = "input")]
-use lazy_static::lazy_static;
 
 type Vec<T> = HLVec<T, 32>;
 
@@ -17,9 +13,7 @@ type HashSet<T> = FnvIndexSet<T, 2048>;
 type Rules = HashSet<(u32, u32)>;
 
 #[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -124,8 +118,7 @@ pub fn part_2() -> u32 {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT: &'static str = r#"47|53
+    const INPUT: &str = r#"47|53
 97|13
 97|61
 97|47
@@ -153,7 +146,6 @@ mod tests {
 75,97,47,61,53
 61,13,29
 97,13,75,29,47"#;
-    }
 
     #[test]
     fn same_results_1() {

@@ -5,9 +5,6 @@ use bitset::BitSet;
 
 use heapless::{Entry, FnvIndexMap, Vec as HLVec};
 
-#[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
 const MAP_SIZE: usize = 64;
 const SET_SIZE: usize = BitSet::with_capacity(MAP_SIZE * MAP_SIZE);
 
@@ -15,9 +12,7 @@ type HashMap<K, V> = FnvIndexMap<K, V, MAP_SIZE>;
 type Vec<T> = HLVec<T, 16>;
 
 #[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -154,8 +149,7 @@ pub fn part_2() -> usize {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT_1: &'static str = r#"............
+    const INPUT_1: &str = r#"............
 ........0...
 .....0......
 .......0....
@@ -167,7 +161,7 @@ mod tests {
 .........A..
 ............
 ............"#;
-        static ref INPUT_2: &'static str = r#"T....#....
+    const INPUT_2: &str = r#"T....#....
 ...T......
 .T....#...
 .........#
@@ -177,7 +171,6 @@ mod tests {
 ..........
 ....#.....
 .........."#;
-    }
 
     #[test]
     fn same_results_1() {

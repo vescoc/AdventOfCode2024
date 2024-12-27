@@ -11,12 +11,7 @@ use rayon::prelude::*;
 use itertools::Itertools;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -115,20 +110,18 @@ pub fn part_2() -> usize {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT_1: &'static str = r#"7 6 4 2 1
+    const INPUT_1: &str = r#"7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
 1 3 2 4 5
 8 6 4 4 1
 1 3 6 7 9"#;
-        static ref INPUT_2: &'static str = r#"7 6 4 2 1
+    const INPUT_2: &str = r#"7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
 1 3 2 4 5
 8 6 4 4 1
 1 3 6 7 9"#;
-    }
 
     #[test]
     fn same_results_1() {

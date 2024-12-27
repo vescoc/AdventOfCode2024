@@ -1,15 +1,11 @@
+#![no_std]
 #![allow(clippy::must_use_candidate)]
-
-#[cfg(feature = "input")]
-use lazy_static::lazy_static;
 
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
 #[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -133,8 +129,7 @@ pub fn part_2() -> usize {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT: &'static str = r#"MMMSXXMASM
+    const INPUT: &str = r#"MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM
 MSAMASMSMX
@@ -144,7 +139,6 @@ SMSMSASXSS
 SAXAMASAAA
 MAMMMXMMMM
 MXMXAXMASX"#;
-    }
 
     #[test]
     fn same_results_1() {

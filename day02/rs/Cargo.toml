@@ -11,12 +11,11 @@ day = 2
 default = ["parallel", "input"]
 
 parallel = ["dep:rayon"]
-input = ["dep:lazy_static"]
+input = []
 
 [dependencies]
 heapless = "0.8.0"
-itertools = "0.13.0"
-lazy_static = { version = "1.4", optional = true }
+itertools = { version = "0.13.0", default-features = false }
 rayon = { version = "1.10.0", optional = true }
 
 [dev-dependencies]
@@ -31,3 +30,7 @@ harness = false
 
 [lints.clippy]
 pedantic = "deny"
+
+[profile.release]
+debug = true
+codegen-units = 1

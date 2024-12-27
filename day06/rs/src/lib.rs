@@ -10,12 +10,7 @@ const VISITED_SIZE: usize = BitSet::with_capacity(131 * 131);
 const VISITED_STATE_SIZE: usize = BitSet::with_capacity(131 * 131 * 5);
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -279,8 +274,7 @@ pub fn part_2() -> usize {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT: &'static str = r#"....#.....
+    const INPUT: &str = r#"....#.....
 .........#
 ..........
 ..#.......
@@ -290,7 +284,6 @@ mod tests {
 ........#.
 #.........
 ......#..."#;
-    }
 
     #[test]
     fn same_results_1() {

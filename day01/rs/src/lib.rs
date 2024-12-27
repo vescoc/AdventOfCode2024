@@ -3,16 +3,11 @@
 
 use heapless::{Entry, FnvIndexMap, Vec as HLVec};
 
-#[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
 type HashMap<K, V> = FnvIndexMap<K, V, 1024>;
 type Vec<T> = HLVec<T, 1024>;
 
 #[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
     
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -106,20 +101,18 @@ pub fn part_2() -> u32 {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT_1: &'static str = r#"3   4
+    const INPUT_1: &str = r#"3   4
 4   3
 2   5
 1   3
 3   9
 3   3"#;
-        static ref INPUT_2: &'static str = r#"3   4
+    const INPUT_2: &str = r#"3   4
 4   3
 2   5
 1   3
 3   9
 3   3"#;
-    }
 
     #[test]
     fn same_results_1() {

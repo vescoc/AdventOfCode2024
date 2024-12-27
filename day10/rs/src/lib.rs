@@ -8,16 +8,11 @@ use heapless::Deque;
 
 use bitset::BitSet as VBitSet;
 
-#[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
 type VecDeque<T> = Deque<T, 32>;
 type BitSet<T, K> = VBitSet<T, K, { VBitSet::with_capacity(64 * 64) }>;
 
 #[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub static INPUT: &'static str = &"";
@@ -128,12 +123,11 @@ pub fn part_2() -> usize {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT_1: &'static str = r#"0123
+    const INPUT_1: &str = r#"0123
 1234
 8765
 9876"#;
-        static ref INPUT_2: &'static str = r#"89010123
+    const INPUT_2: &str = r#"89010123
 78121874
 87430965
 96549874
@@ -141,7 +135,6 @@ mod tests {
 32019012
 01329801
 10456732"#;
-    }
 
     #[test]
     fn same_results_1_1() {

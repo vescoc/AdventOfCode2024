@@ -1,3 +1,5 @@
+#![no_std]
+
 use core::{marker, mem, ops};
 
 const BITS: usize = mem::size_of::<u128>() * 8;

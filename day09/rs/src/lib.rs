@@ -4,12 +4,7 @@ use std::cmp::Reverse;
 use std::collections::BinaryHeap;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -194,9 +189,7 @@ pub fn part_2() -> u64 {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT: &'static str = r#"2333133121414131402"#;
-    }
+    const INPUT: &str = r#"2333133121414131402"#;
 
     #[test]
     fn same_results_1() {

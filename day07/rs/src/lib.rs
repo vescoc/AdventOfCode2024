@@ -6,16 +6,11 @@ use rayon::prelude::*;
 
 use heapless::Vec as HLVec;
 
-#[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
 type Vec<T> = HLVec<T, 16>;
 type Stack<T> = HLVec<T, 32>;
 
 #[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -124,8 +119,7 @@ pub fn part_2() -> u64 {
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT: &'static str = r#"190: 10 19
+    const INPUT: &str = r#"190: 10 19
 3267: 81 40 27
 83: 17 5
 156: 15 6
@@ -134,7 +128,6 @@ mod tests {
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20"#;
-    }
 
     #[test]
     fn same_results_1() {
