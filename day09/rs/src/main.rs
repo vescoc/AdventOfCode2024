@@ -21,7 +21,7 @@ fn main() {
     use std::io;
 
     let input = io::read_to_string(io::stdin()).expect("cannot read input");
-    
+
     let now = Instant::now();
 
     println!("part 1: {}", day09::solve_1(&input));
