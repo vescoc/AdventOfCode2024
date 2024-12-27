@@ -106,19 +106,19 @@ pub fn solve_2(input: &str) -> u32 {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> u32 {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> u32 {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const INPUT: &str = r#"47|53
+    const INPUT: &str = r"47|53
 97|13
 97|61
 97|47
@@ -145,15 +145,15 @@ mod tests {
 75,29,13
 75,97,47,61,53
 61,13,29
-97,13,75,29,47"#;
+97,13,75,29,47";
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT), 143);
+        assert_eq!(solve_1(INPUT), 143);
     }
 
     #[test]
     fn same_results_2() {
-        assert_eq!(solve_2(&INPUT), 123);
+        assert_eq!(solve_2(INPUT), 123);
     }
 }

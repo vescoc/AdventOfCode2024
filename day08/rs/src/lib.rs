@@ -137,19 +137,19 @@ pub fn solve_2(input: &str) -> usize {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> usize {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> usize {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const INPUT_1: &str = r#"............
+    const INPUT_1: &str = r"............
 ........0...
 .....0......
 .......0....
@@ -160,8 +160,8 @@ mod tests {
 ........A...
 .........A..
 ............
-............"#;
-    const INPUT_2: &str = r#"T....#....
+............";
+    const INPUT_2: &str = r"T....#....
 ...T......
 .T....#...
 .........#
@@ -170,20 +170,20 @@ mod tests {
 ...#......
 ..........
 ....#.....
-.........."#;
+..........";
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT_1), 14);
+        assert_eq!(solve_1(INPUT_1), 14);
     }
 
     #[test]
     fn same_results_2_1() {
-        assert_eq!(solve_2(&INPUT_2), 9);
+        assert_eq!(solve_2(INPUT_2), 9);
     }
 
     #[test]
     fn same_results_2_2() {
-        assert_eq!(solve_2(&INPUT_1), 34);
+        assert_eq!(solve_2(INPUT_1), 34);
     }
 }

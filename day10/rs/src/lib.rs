@@ -112,42 +112,42 @@ pub fn solve_2(input: &str) -> usize {
 }
 
 pub fn part_1() -> usize {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 pub fn part_2() -> usize {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const INPUT_1: &str = r#"0123
+    const INPUT_1: &str = r"0123
 1234
 8765
-9876"#;
-    const INPUT_2: &str = r#"89010123
+9876";
+    const INPUT_2: &str = r"89010123
 78121874
 87430965
 96549874
 45678903
 32019012
 01329801
-10456732"#;
+10456732";
 
     #[test]
     fn same_results_1_1() {
-        assert_eq!(solve_1(&INPUT_1), 1);
+        assert_eq!(solve_1(INPUT_1), 1);
     }
 
     #[test]
     fn same_results_1_2() {
-        assert_eq!(solve_1(&INPUT_2), 36);
+        assert_eq!(solve_1(INPUT_2), 36);
     }
 
     #[test]
     fn same_results_2() {
-        assert_eq!(solve_2(&INPUT_2), 81);
+        assert_eq!(solve_2(INPUT_2), 81);
     }
 }

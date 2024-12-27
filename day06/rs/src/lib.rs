@@ -262,19 +262,19 @@ pub use solve_2_par as solve_2;
 
 #[cfg(feature = "input")]
 pub fn part_1() -> usize {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> usize {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const INPUT: &str = r#"....#.....
+    const INPUT: &str = r"....#.....
 .........#
 ..........
 ..#.......
@@ -283,20 +283,20 @@ mod tests {
 .#..^.....
 ........#.
 #.........
-......#..."#;
+......#...";
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT), 41);
+        assert_eq!(solve_1(INPUT), 41);
     }
 
     #[test]
     fn same_results_2_sync() {
-        assert_eq!(solve_2_sync(&INPUT), 6);
+        assert_eq!(solve_2_sync(INPUT), 6);
     }
 
     #[test]
     fn same_results_2_par() {
-        assert_eq!(solve_2_par(&INPUT), 6);
+        assert_eq!(solve_2_par(INPUT), 6);
     }
 }

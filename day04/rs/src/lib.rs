@@ -117,19 +117,19 @@ pub fn solve_2(input: &str) -> usize {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> usize {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> usize {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    const INPUT: &str = r#"MMMSXXMASM
+    const INPUT: &str = r"MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM
 MSAMASMSMX
@@ -138,15 +138,15 @@ XXAMMXXAMA
 SMSMSASXSS
 SAXAMASAAA
 MAMMMXMMMM
-MXMXAXMASX"#;
+MXMXAXMASX";
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT), 18);
+        assert_eq!(solve_1(INPUT), 18);
     }
 
     #[test]
     fn same_results_2() {
-        assert_eq!(solve_2(&INPUT), 9);
+        assert_eq!(solve_2(INPUT), 9);
     }
 }

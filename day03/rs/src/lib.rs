@@ -254,12 +254,12 @@ pub use solve_2_handmade as solve_2;
 
 #[cfg(feature = "input")]
 pub fn part_1() -> u32 {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> u32 {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
@@ -267,27 +267,27 @@ mod tests {
     use super::*;
 
     const INPUT_1: &str =
-        r#"xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))"#;
+        r"xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))";
     const INPUT_2: &str =
-        r#"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))"#;
+        r"xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))";
 
     #[test]
     fn same_results_1_handmade() {
-        assert_eq!(solve_1_handmade(&INPUT_1), 161);
+        assert_eq!(solve_1_handmade(INPUT_1), 161);
     }
 
     #[test]
     fn same_results_1_nom() {
-        assert_eq!(solve_1_nom(&INPUT_1), 161);
+        assert_eq!(solve_1_nom(INPUT_1), 161);
     }
 
     #[test]
     fn same_results_2_handmade() {
-        assert_eq!(solve_2_handmade(&INPUT_2), 48);
+        assert_eq!(solve_2_handmade(INPUT_2), 48);
     }
 
     #[test]
     fn same_results_2_nom() {
-        assert_eq!(solve_2_handmade(&INPUT_2), 48);
+        assert_eq!(solve_2_handmade(INPUT_2), 48);
     }
 }
