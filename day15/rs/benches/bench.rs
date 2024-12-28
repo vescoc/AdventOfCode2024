@@ -1,13 +1,11 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 
-use day15::*;
-
 pub fn criterion_benchmark(c: &mut Criterion) {
-    c.bench_function("part 1", |b| b.iter(part_1));
+    c.bench_function("part 1", |b| b.iter(day15::part_1));
 
     let mut group = c.benchmark_group("part 2");
-    group.bench_function("rec", |b| b.iter(|| solve_2_rec(&INPUT)));
-    group.bench_function("bfs", |b| b.iter(|| solve_2_bfs(&INPUT)));
+    group.bench_function("rec", |b| b.iter(|| day15::solve_2_rec(day15::INPUT)));
+    group.bench_function("bfs", |b| b.iter(|| day15::solve_2_bfs(day15::INPUT)));
     group.finish();
 }
 

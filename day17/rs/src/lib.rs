@@ -9,12 +9,7 @@ pub type String = HLString<32>;
 type Vec<T> = HLVec<T, 128>;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -186,7 +181,7 @@ pub fn solve_2(input: &str) -> Integer {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> String {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
@@ -206,36 +201,35 @@ pub fn part_2() -> Integer {
     // out B // 5,4   -   -> B & 0x111
     // jnz 0 // 3,0   - goto 0
 
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT_1: &'static str = r#"Register A: 729
+    const INPUT_1: &str = r"Register A: 729
 Register B: 0
 Register C: 0
 
-Program: 0,1,5,4,3,0"#;
-        static ref INPUT_2: &'static str = r#"Register A: 2024
+Program: 0,1,5,4,3,0";
+    const INPUT_2: &str = r"Register A: 2024
 Register B: 0
 Register C: 0
 
-Program: 0,3,5,4,3,0"#;
-    }
+Program: 0,3,5,4,3,0";
 
     #[test]
     fn same_results_1() {
         assert_eq!(
-            solve_1(&INPUT_1),
+            solve_1(INPUT_1),
             String::try_from("4,6,3,5,6,3,5,2,1,0").unwrap()
         );
     }
 
     #[test]
+    #[allow(clippy::unreadable_literal)]
     fn same_results_2() {
-        assert_eq!(solve_2(&INPUT_2), 117440);
+        assert_eq!(solve_2(INPUT_2), 117440);
     }
 }

@@ -4,12 +4,7 @@
 use heapless::{String as HLString, Vec as HLVec};
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -115,20 +110,19 @@ pub fn solve_2(input: &str) -> usize {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> usize {
-    solve_1::<WIDTH, HEIGHT>(&INPUT)
+    solve_1::<WIDTH, HEIGHT>(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> usize {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT: &'static str = r#"p=0,4 v=3,-3
+    const INPUT: &str = r"p=0,4 v=3,-3
 p=6,3 v=-1,-3
 p=10,3 v=-1,2
 p=2,0 v=2,-1
@@ -139,11 +133,10 @@ p=3,0 v=-1,-2
 p=9,3 v=2,3
 p=7,3 v=-1,2
 p=2,4 v=2,-3
-p=9,5 v=-3,-3"#;
-    }
+p=9,5 v=-3,-3";
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1::<11, 7>(&INPUT), 12);
+        assert_eq!(solve_1::<11, 7>(INPUT), 12);
     }
 }

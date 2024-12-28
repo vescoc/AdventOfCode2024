@@ -3,18 +3,13 @@
 
 use heapless::{Entry, FnvIndexMap};
 
-#[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
 type Map<K, T> = FnvIndexMap<K, T, 4096>;
 
 #[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
-pub static INPUT: &'static str = &"";
+pub const INPUT: &str = &"";
 
 struct Stones(Map<u64, u64>);
 
@@ -119,21 +114,21 @@ pub fn solve_2(input: &str) -> u64 {
     solve(input, 75)
 }
 
+#[cfg(feature = "input")]
 pub fn part_1() -> u64 {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> u64 {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT: &'static str = r#"125 17"#;
-    }
+    const INPUT: &str = r"125 17";
 
     #[test]
     fn test_split_if_even() {
@@ -143,11 +138,11 @@ mod tests {
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT), 55312);
+        assert_eq!(solve_1(INPUT), 55312);
     }
 
     #[test]
     fn test_solve() {
-        assert_eq!(solve(&INPUT, 25), 55312);
+        assert_eq!(solve(INPUT, 25), 55312);
     }
 }

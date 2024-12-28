@@ -8,12 +8,7 @@ use heapless::{Deque as HLDeque, String as HLString, Vec as HLVec};
 use bitset::BitSet;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -322,22 +317,19 @@ pub fn solve_2(input: &str) -> String {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> usize {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> String {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    use lazy_static::lazy_static;
-
-    lazy_static! {
-        static ref INPUT: &'static str = r#"5,4
+    const INPUT: &str = r"5,4
 4,2
 4,5
 3,0
@@ -361,13 +353,12 @@ mod tests {
 1,0
 0,5
 1,6
-2,0"#;
-    }
+2,0";
 
     #[test]
     fn same_results_1() {
         assert_eq!(
-            solve_1_bfs::<7, 7, 12, { BitSet::with_capacity(7 * 7) }>(&INPUT),
+            solve_1_bfs::<7, 7, 12, { BitSet::with_capacity(7 * 7) }>(INPUT),
             22
         );
     }
@@ -376,7 +367,7 @@ mod tests {
     fn same_results_2_bs_dfs() {
         assert_eq!(
             &solve_2_bs::<7, 7, { BitSet::with_capacity(7 * 7) }, 0>(
-                &INPUT,
+                INPUT,
                 dfs::<7, 7, { BitSet::with_capacity(7 * 7) }>
             ),
             &"6,1"
@@ -387,7 +378,7 @@ mod tests {
     fn same_results_2_bs_bfs() {
         assert_eq!(
             &solve_2_bs::<7, 7, { BitSet::with_capacity(7 * 7) }, 0>(
-                &INPUT,
+                INPUT,
                 bfs::<7, 7, { BitSet::with_capacity(7 * 7) }>
             ),
             &"6,1"
@@ -397,7 +388,7 @@ mod tests {
     #[test]
     fn same_results_2_bru() {
         assert_eq!(
-            &solve_2_bru::<7, 7, { BitSet::with_capacity(7 * 7) }>(&INPUT),
+            &solve_2_bru::<7, 7, { BitSet::with_capacity(7 * 7) }>(INPUT),
             &"6,1"
         );
     }

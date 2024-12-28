@@ -6,14 +6,13 @@ edition = "2021"
 [features]
 default = ["input"]
 
-input = ["dep:lazy_static"]
+input = []
 
 [package.metadata.aoc]
 year = 2024
 day = 12
 
 [dependencies]
-lazy_static = { version = "1.4", optional = true }
 bitset = { path = "../../common/rs/bitset" }
 heapless = "0.8.0"
 

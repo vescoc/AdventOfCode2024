@@ -6,7 +6,7 @@ edition = "2021"
 [features]
 default = ["input"]
 
-input = ["dep:lazy_static"]
+input = []
 
 [package.metadata.aoc]
 year = 2024
@@ -14,7 +14,6 @@ day = 16
 
 [dependencies]
 bitset = { path = "../../common/rs/bitset" }
-lazy_static = { version = "1.4", optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

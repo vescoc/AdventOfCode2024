@@ -1,4 +1,4 @@
-// #![no_std]
+#![no_std]
 #![cfg_attr(feature = "simd", feature(portable_simd))]
 #![allow(clippy::must_use_candidate)]
 
@@ -8,12 +8,7 @@ use core::{cmp, convert, iter, ops};
 pub mod simd;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -163,20 +158,19 @@ pub fn solve_2(input: &str) -> i64 {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> i32 {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> i64 {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    lazy_static! {
-        pub(crate) static ref INPUT: &'static str = r#"Button A: X+94, Y+34
+    pub(crate) const INPUT: &str = r"Button A: X+94, Y+34
 Button B: X+22, Y+67
 Prize: X=8400, Y=5400
 
@@ -190,16 +184,15 @@ Prize: X=7870, Y=6450
 
 Button A: X+69, Y+23
 Button B: X+27, Y+71
-Prize: X=18641, Y=10279"#;
-    }
+Prize: X=18641, Y=10279";
 
     #[test]
     fn same_results_1_1() {
         assert_eq!(
             push_machine::<Machine0, _>(
-                r#"Button A: X+94, Y+34
+                r"Button A: X+94, Y+34
 Button B: X+22, Y+67
-Prize: X=8400, Y=5400"#
+Prize: X=8400, Y=5400"
             ),
             Some(280)
         );
@@ -209,9 +202,9 @@ Prize: X=8400, Y=5400"#
     fn same_results_1_2() {
         assert_eq!(
             push_machine::<Machine0, _>(
-                r#"Button A: X+26, Y+66
+                r"Button A: X+26, Y+66
 Button B: X+67, Y+21
-Prize: X=12748, Y=12176"#
+Prize: X=12748, Y=12176"
             ),
             None
         );
@@ -221,9 +214,9 @@ Prize: X=12748, Y=12176"#
     fn same_results_1_3() {
         assert_eq!(
             push_machine::<Machine0, _>(
-                r#"Button A: X+17, Y+86
+                r"Button A: X+17, Y+86
 Button B: X+84, Y+37
-Prize: X=7870, Y=6450"#
+Prize: X=7870, Y=6450"
             ),
             Some(200)
         );
@@ -233,9 +226,9 @@ Prize: X=7870, Y=6450"#
     fn same_results_1_4() {
         assert_eq!(
             push_machine::<Machine0, _>(
-                r#"Button A: X+69, Y+23
+                r"Button A: X+69, Y+23
 Button B: X+27, Y+71
-Prize: X=18641, Y=10279"#
+Prize: X=18641, Y=10279"
             ),
             None
         );
@@ -243,6 +236,6 @@ Prize: X=18641, Y=10279"#
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT), 480);
+        assert_eq!(solve_1(INPUT), 480);
     }
 }

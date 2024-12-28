@@ -113,11 +113,11 @@ mod test {
 
     #[test]
     fn same_test_1() {
-        assert_eq!(solve_1::<64>(&crate::tests::INPUT), 480);
+        assert_eq!(solve_1::<64>(crate::tests::INPUT), 480);
     }
 
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1::<64>(&crate::INPUT), 37686);
+        assert_eq!(solve_1::<64>(crate::INPUT), 37686);
     }
 }

@@ -1,3 +1,4 @@
+#![no_std]
 #![allow(clippy::must_use_candidate)]
 
 use bitset::BitSet;
@@ -6,12 +7,7 @@ use bitset::BitSet;
 use rayon::prelude::*;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -224,22 +220,19 @@ pub fn solve_2(input: &str) -> usize {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> usize {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> usize {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    use lazy_static::lazy_static;
-
-    lazy_static! {
-        static ref INPUT: &'static str = r#"###############
+    const INPUT: &str = r"###############
 #...#...#.....#
 #.#.#.#.#.###.#
 #S#...#.#.#...#
@@ -253,35 +246,34 @@ mod tests {
 #.#...#.#.#...#
 #.#.#.#.#.#.###
 #...#...#...###
-###############"#;
-    }
+###############";
 
     #[test]
     fn same_results_1_m() {
-        assert_eq!(solve_m::<12, 2>(&INPUT), 3 + 1 + 1 + 1 + 1 + 1);
+        assert_eq!(solve_m::<12, 2>(INPUT), 3 + 1 + 1 + 1 + 1 + 1);
     }
 
     #[test]
     fn same_results_2_m() {
-        assert_eq!(solve_m::<50, 20>(&INPUT), 285);
+        assert_eq!(solve_m::<50, 20>(INPUT), 285);
     }
 
     #[test]
     fn same_results_1_v() {
-        assert_eq!(solve_v::<12, 2>(&INPUT), 3 + 1 + 1 + 1 + 1 + 1);
+        assert_eq!(solve_v::<12, 2>(INPUT), 3 + 1 + 1 + 1 + 1 + 1);
     }
 
     #[test]
     fn same_results_2_v() {
-        assert_eq!(solve_v::<50, 20>(&INPUT), 285);
+        assert_eq!(solve_v::<50, 20>(INPUT), 285);
     }
 
     #[cfg(feature = "input")]
     #[test]
     fn same_results_1_v_vs_m() {
         assert_eq!(
-            solve_v::<100, 2>(&super::INPUT),
-            solve_m::<100, 2>(&super::INPUT)
+            solve_v::<100, 2>(super::INPUT),
+            solve_m::<100, 2>(super::INPUT)
         );
     }
 
@@ -289,8 +281,8 @@ mod tests {
     #[test]
     fn same_results_2_v_vs_m() {
         assert_eq!(
-            solve_v::<100, 20>(&super::INPUT),
-            solve_m::<100, 20>(&super::INPUT)
+            solve_v::<100, 20>(super::INPUT),
+            solve_m::<100, 20>(super::INPUT)
         );
     }
 }

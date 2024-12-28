@@ -4,12 +4,7 @@
 use core::iter;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -310,30 +305,27 @@ pub fn solve_2(input: &str) -> u64 {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> u64 {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> u64 {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    use lazy_static::lazy_static;
-
-    lazy_static! {
-        static ref INPUT: &'static str = r#"029A
+    const INPUT: &str = r"029A
 980A
 179A
 456A
-379A"#;
-    }
+379A";
 
+    #[allow(clippy::unreadable_literal)]
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT), 126384);
+        assert_eq!(solve_1(INPUT), 126384);
     }
 }

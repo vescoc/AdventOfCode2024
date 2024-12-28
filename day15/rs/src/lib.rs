@@ -3,17 +3,12 @@
 
 use heapless::Vec as HLVec;
 
-#[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
 type Position = (usize, usize);
 
 type Vec<T> = HLVec<T, { 64 * 128 }>;
 
 #[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -377,20 +372,19 @@ fn solve<const TARGET: u8>(
 
 #[cfg(feature = "input")]
 pub fn part_1() -> usize {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> usize {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT_1: &'static str = r#"########
+    const INPUT_1: &str = r"########
 #..O.O.#
 ##@.O..#
 #...O..#
@@ -399,9 +393,8 @@ mod tests {
 #......#
 ########
 
-<^^>>>vv<v>>v<<"#;
-        static ref INPUT_2: &'static str = include_str!("../../example1");
-    }
+<^^>>>vv<v>>v<<";
+    const INPUT_2: &str = include_str!("../../example1");
 
     #[test]
     fn test_gps_score() {
@@ -416,7 +409,7 @@ mod tests {
 #OO....OO#
 ##########";
 
-        assert_eq!(gps_score::<b'O'>(&input.as_slice(), &(10, 10)), 10092);
+        assert_eq!(gps_score::<b'O'>(input.as_slice(), &(10, 10)), 10092);
     }
 
     #[test]
@@ -530,27 +523,27 @@ mod tests {
 
     #[test]
     fn same_results_1_1() {
-        assert_eq!(solve_1(&INPUT_1), 2028);
+        assert_eq!(solve_1(INPUT_1), 2028);
     }
 
     #[test]
     fn same_results_1_2() {
-        assert_eq!(solve_1(&INPUT_2), 10092);
+        assert_eq!(solve_1(INPUT_2), 10092);
     }
 
     #[test]
     fn same_results_2_rec() {
-        assert_eq!(solve_2_rec(&INPUT_2), 9021);
+        assert_eq!(solve_2_rec(INPUT_2), 9021);
     }
 
     #[test]
     fn same_results_2_bfs() {
-        assert_eq!(solve_2_bfs(&INPUT_2), 9021);
+        assert_eq!(solve_2_bfs(INPUT_2), 9021);
     }
 
     #[cfg(feature = "input")]
     #[test]
     fn same_results_2() {
-        assert_eq!(solve_2_rec(&INPUT), solve_2_bfs(&INPUT));
+        assert_eq!(solve_2_rec(INPUT), solve_2_bfs(INPUT));
     }
 }

@@ -9,12 +9,7 @@ use itertools::Itertools;
 use rayon::prelude::*;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -121,38 +116,35 @@ pub use solve_2_seq as solve_2;
 
 #[cfg(feature = "input")]
 pub fn part_1() -> u64 {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> u16 {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
-    use lazy_static::lazy_static;
-
     use super::*;
 
-    lazy_static! {
-        static ref INPUT_1: &'static str = r#"1
+    const INPUT_1: &str = r"1
 10
 100
-2024"#;
-        static ref INPUT_2: &'static str = r#"1
+2024";
+    const INPUT_2: &str = r"1
 2
 3
-2024"#;
-    }
+2024";
 
+    #[allow(clippy::unreadable_literal)]
     #[test]
     fn same_results_1() {
-        assert_eq!(solve_1(&INPUT_1), 37327623);
+        assert_eq!(solve_1(INPUT_1), 37327623);
     }
 
     #[test]
     fn same_results_2() {
-        assert_eq!(solve_2(&INPUT_2), 23);
+        assert_eq!(solve_2(INPUT_2), 23);
     }
 }

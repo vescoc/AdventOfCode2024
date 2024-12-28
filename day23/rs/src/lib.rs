@@ -1,4 +1,4 @@
-//#![no_std]
+#![no_std]
 #![allow(clippy::must_use_candidate)]
 
 #[cfg(feature = "parallel")]

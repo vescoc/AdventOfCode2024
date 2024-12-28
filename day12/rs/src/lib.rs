@@ -9,12 +9,7 @@ type Set<T, K> = BitSet<T, K, { BitSet::with_capacity(141 * 141) }>;
 type Map<K, V> = FnvIndexMap<K, V, 512>;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -122,29 +117,30 @@ pub fn solve_2(input: &str) -> usize {
     )
 }
 
+#[cfg(feature = "input")]
 pub fn part_1() -> usize {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
+#[cfg(feature = "input")]
 pub fn part_2() -> usize {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    lazy_static! {
-        static ref INPUT_1: &'static str = r#"AAAA
+    const INPUT_1: &str = r"AAAA
 BBCD
 BBCC
-EEEC"#;
-        static ref INPUT_2: &'static str = r#"OOOOO
+EEEC";
+    const INPUT_2: &str = r"OOOOO
 OXOXO
 OOOOO
 OXOXO
-OOOOO"#;
-        static ref INPUT_3: &'static str = r#"RRRRIICCFF
+OOOOO";
+    const INPUT_3: &str = r"RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
 VVRCCCJFFF
@@ -153,57 +149,56 @@ VVIVCCJJEE
 VVIIICJJEE
 MIIIIIJJEE
 MIIISIJEEE
-MMMISSJEEE"#;
-        static ref INPUT_4: &'static str = r#"EEEEE
+MMMISSJEEE";
+    const INPUT_4: &str = r"EEEEE
 EXXXX
 EEEEE
 EXXXX
-EEEEE"#;
-        static ref INPUT_5: &'static str = r#"AAAAAA
+EEEEE";
+    const INPUT_5: &str = r"AAAAAA
 AAABBA
 AAABBA
 ABBAAA
 ABBAAA
-AAAAAA"#;
-    }
+AAAAAA";
 
     #[test]
     fn same_results_1_1() {
-        assert_eq!(solve_1(&INPUT_1), 140);
+        assert_eq!(solve_1(INPUT_1), 140);
     }
 
     #[test]
     fn same_results_1_2() {
-        assert_eq!(solve_1(&INPUT_2), 772);
+        assert_eq!(solve_1(INPUT_2), 772);
     }
 
     #[test]
     fn same_results_1_3() {
-        assert_eq!(solve_1(&INPUT_3), 1930);
+        assert_eq!(solve_1(INPUT_3), 1930);
     }
 
     #[test]
     fn same_results_2_1() {
-        assert_eq!(solve_2(&INPUT_1), 80);
+        assert_eq!(solve_2(INPUT_1), 80);
     }
 
     #[test]
     fn same_results_2_2() {
-        assert_eq!(solve_2(&INPUT_2), 436);
+        assert_eq!(solve_2(INPUT_2), 436);
     }
 
     #[test]
     fn same_results_2_3() {
-        assert_eq!(solve_2(&INPUT_4), 236);
+        assert_eq!(solve_2(INPUT_4), 236);
     }
 
     #[test]
     fn same_results_2_4() {
-        assert_eq!(solve_2(&INPUT_5), 368);
+        assert_eq!(solve_2(INPUT_5), 368);
     }
 
     #[test]
     fn same_results_2_5() {
-        assert_eq!(solve_2(&INPUT_3), 1206);
+        assert_eq!(solve_2(INPUT_3), 1206);
     }
 }

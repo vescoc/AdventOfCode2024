@@ -1,6 +1,16 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 
-use day18::*;
+use day18::{
+    part_1,
+    solve_2_bs,
+    bfs,
+    dfs,
+    solve_2_bru,
+    INPUT,
+    PUZZLE_WIDTH,
+    PUZZLE_HEIGHT,
+    BITSET_SIZE,
+};
 
 const INPUT_213X213: &str = include_str!("../../input-213x213");
 
@@ -11,18 +21,18 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     group.bench_function("bs/bfs", |b| {
         b.iter(|| {
             solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 1024>(
-                &INPUT,
+                day18::INPUT,
                 bfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>,
             )
-        })
+        });
     });
     group.bench_function("bs/dfs", |b| {
         b.iter(|| {
             solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 1024>(
-                &INPUT,
+                INPUT,
                 dfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>,
             )
-        })
+        });
     });
     group.finish();
 
@@ -30,22 +40,22 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     group.bench_function("bs/bfs", |b| {
         b.iter(|| {
             solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 0>(
-                &INPUT,
+                INPUT,
                 bfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>,
             )
-        })
+        });
     });
     group.bench_function("bs/dfs", |b| {
         b.iter(|| {
             solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 0>(
-                &INPUT,
+                INPUT,
                 dfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>,
             )
-        })
+        });
     });
     group.finish();
     
-    c.bench_function("bru", |b| b.iter(|| solve_2_bru::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>(&INPUT)));
+    c.bench_function("bru", |b| b.iter(|| solve_2_bru::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE>(INPUT)));
 
     {
         const BITSET_SIZE: usize = bitset::BitSet::with_capacity(213 * 213);
@@ -54,19 +64,19 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         group.bench_function("bru", |b| {
             b.iter(|| {
                 solve_2_bru::<213, 213, BITSET_SIZE>(
-                    &INPUT_213X213,
+                    INPUT_213X213,
                 )
-            })
+            });
         });
         group.bench_function("bs/bfs", |b| {
             b.iter(|| {
                 solve_2_bs::<213, 213, BITSET_SIZE, 0>(
-                    &INPUT,
+                    INPUT_213X213,
                     bfs::<213, 213, BITSET_SIZE>,
                 )
-            })
+            });
         });
-        group.finish()
+        group.finish();
     }
 }
 

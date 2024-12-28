@@ -11,12 +11,7 @@ type Map<K, V> = FnvIndexMap<K, V, 64>;
 type Vec<T> = HLVec<T, 4096>;
 
 #[cfg(feature = "input")]
-use lazy_static::lazy_static;
-
-#[cfg(feature = "input")]
-lazy_static! {
-    pub static ref INPUT: &'static str = include_str!("../../input");
-}
+pub const INPUT: &str = include_str!("../../input");
 
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
@@ -200,22 +195,19 @@ pub fn solve_2_dp(input: &str) -> u64 {
 
 #[cfg(feature = "input")]
 pub fn part_1() -> usize {
-    solve_1(&INPUT)
+    solve_1(INPUT)
 }
 
 #[cfg(feature = "input")]
 pub fn part_2() -> u64 {
-    solve_2(&INPUT)
+    solve_2(INPUT)
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    use lazy_static::lazy_static;
-
-    lazy_static! {
-        static ref INPUT: &'static str = r#"r, wr, b, g, bwu, rb, gb, br
+    const INPUT: &str = r"r, wr, b, g, bwu, rb, gb, br
 
 brwrr
 bggr
@@ -224,38 +216,37 @@ rrbgbr
 ubwu
 bwurrg
 brgr
-bbrgwb"#;
-    }
+bbrgwb";
 
     #[test]
     fn same_results_1_r() {
-        assert_eq!(solve_1_r(&INPUT), 6);
+        assert_eq!(solve_1_r(INPUT), 6);
     }
 
     #[test]
     fn same_results_1_dp() {
-        assert_eq!(solve_1_dp(&INPUT), 6);
+        assert_eq!(solve_1_dp(INPUT), 6);
     }
 
     #[cfg(feature = "input")]
     #[test]
     fn same_results_1_r_vs_dp() {
-        assert_eq!(solve_1_r(&super::INPUT), solve_1_dp(&super::INPUT));
+        assert_eq!(solve_1_r(super::INPUT), solve_1_dp(super::INPUT));
     }
 
     #[test]
     fn same_results_2_r() {
-        assert_eq!(solve_2_r(&INPUT), 16);
+        assert_eq!(solve_2_r(INPUT), 16);
     }
 
     #[test]
     fn same_results_2_dp() {
-        assert_eq!(solve_2_dp(&INPUT), 16);
+        assert_eq!(solve_2_dp(INPUT), 16);
     }
 
     #[cfg(feature = "input")]
     #[test]
     fn same_results_2_r_vs_dp() {
-        assert_eq!(solve_2_r(&super::INPUT), solve_2_dp(&super::INPUT));
+        assert_eq!(solve_2_r(super::INPUT), solve_2_dp(super::INPUT));
     }
 }

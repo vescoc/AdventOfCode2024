@@ -1,6 +1,6 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 
-use day21::*;
+use day21::{part_1, part_2};
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("part 1", |b| b.iter(part_1));

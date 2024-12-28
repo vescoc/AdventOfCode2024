@@ -18,10 +18,14 @@ fn main() {
 
 #[cfg(not(feature = "input"))]
 fn main() {
+    use std::io;
+
+    let input = io::read_to_string(io::stdin()).expect("cannot read input");
+    
     let now = Instant::now();
 
-    println!("part 1: {}", day08::part_1());
-    println!("part 2: {}", day08::part_2());
+    println!("part 1: {}", day08::solve_1(&input));
+    println!("part 2: {}", day08::solve_2(&input));
 
     let elapsed = now.elapsed();
     println!(
