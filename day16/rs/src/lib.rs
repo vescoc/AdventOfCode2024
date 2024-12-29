@@ -1,8 +1,9 @@
+#![no_std]
 #![allow(clippy::must_use_candidate)]
 
 use core::cmp;
 
-use std::collections::{BinaryHeap, HashMap};
+use heapless::{binary_heap, BinaryHeap as HLBinaryHeap};
 
 use bitset::BitSet;
 
@@ -12,13 +13,39 @@ pub const INPUT: &str = include_str!("../../input");
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
 
+const WIDTH: usize = 140;
+const HEIGHT: usize = 140;
+const DIMENSION: usize = 5;
+
+type Queue<T> = HLBinaryHeap<T, binary_heap::Max, { 1024 * 4 }>;
+
+#[allow(clippy::cast_sign_loss, clippy::cast_possible_wrap)]
+#[inline]
+fn costs_key((r, c): (u8, u8), (dr, dc): (i8, i8)) -> usize {
+    let d = match (dr, dc) {
+        (-1, 0) => 0,
+        (1, 0) => 1,
+        (0, 1) => 2,
+        (0, -1) => 3,
+        _ => unreachable!(),
+    };
+
+    ((((r - 1) as isize * WIDTH as isize + c as isize - 1) << 2) + d) as usize
+}
+
 /// # Panics
-pub fn solve_1(input: &str) -> u32 {
-    #[derive(Eq, PartialEq)]
+#[allow(clippy::cast_possible_truncation)]
+fn dijkstra(
+    costs: &mut [u32],
+    maze: &[u8],
+    &(height, width): &(usize, usize),
+    (start_r, start_c): (u8, u8),
+) -> Option<(u32, (u8, u8))> {
+    #[derive(Debug, Eq, PartialEq)]
     struct Node {
-        position: (usize, usize),
-        direction: (isize, isize),
         cost: u32,
+        position: (u8, u8),
+        direction: (i8, i8),
     }
 
     impl Ord for Node {
@@ -33,31 +60,14 @@ pub fn solve_1(input: &str) -> u32 {
         }
     }
 
-    let maze = input.as_bytes();
-    let width = maze.iter().position(|&c| c == b'\n').unwrap();
-    let height = (maze.len() + 1) / (width + 1);
-
-    let (r, c) = maze
-        .chunks(width + 1)
-        .take(height)
-        .enumerate()
-        .find_map(|(r, row)| {
-            row.iter()
-                .take(width)
-                .position(|&tile| tile == b'S')
-                .map(|c| (r, c))
+    let mut queue = Queue::new();
+    queue
+        .push(Node {
+            position: (start_r, start_c),
+            direction: (0, 1),
+            cost: 0,
         })
-        .expect("invalid maze: cannot find `S`");
-
-    let mut costs = HashMap::with_capacity(140 * 140);
-    costs.insert(((r, c), (0, 1)), 0);
-
-    let mut queue = BinaryHeap::with_capacity(4096);
-    queue.push(Node {
-        position: (r, c),
-        direction: (0, 1),
-        cost: 0,
-    });
+        .unwrap();
 
     while let Some(Node {
         position: (r, c),
@@ -65,37 +75,41 @@ pub fn solve_1(input: &str) -> u32 {
         cost,
     }) = queue.pop()
     {
-        if cost > costs.get(&((r, c), (dr, dc))).copied().unwrap_or(u32::MAX) {
+        if cost > costs[costs_key((r, c), (dr, dc))] {
             continue;
         }
 
-        if maze[r * (width + 1) + c] == b'E' {
-            return cost;
+        if maze[r as usize * (width + 1) + c as usize] == b'E' {
+            return Some((cost, (r, c)));
         }
 
         for (ndr, ndc) in [(0, 1), (0, -1), (1, 0), (-1, 0)] {
             match (r.checked_add_signed(ndr), c.checked_add_signed(ndc)) {
                 (Some(r), Some(c))
-                    if r < height && c < width && maze[r * (width + 1) + c] != b'#' =>
+                    if (r as usize) < height
+                        && (c as usize) < width
+                        && maze[r as usize * (width + 1) + c as usize] != b'#' =>
                 {
                     let neighbor_cost = if (ndr, ndc) == (dr, dc) {
                         0
                     } else if ndr == -dr || ndc == -dc {
-                        2000
+                        continue;
                     } else {
                         1000
                     } + cost
                         + 1;
 
-                    let e = costs.entry(((r, c), (ndr, ndc))).or_insert(u32::MAX);
+                    let e = &mut costs[costs_key((r, c), (ndr, ndc))];
                     if *e > neighbor_cost {
                         // I need only the first best
                         *e = neighbor_cost;
-                        queue.push(Node {
-                            position: (r, c),
-                            direction: (ndr, ndc),
-                            cost: neighbor_cost,
-                        });
+                        queue
+                            .push(Node {
+                                position: (r, c),
+                                direction: (ndr, ndc),
+                                cost: neighbor_cost,
+                            })
+                            .unwrap();
                     }
                 }
                 _ => {}
@@ -103,45 +117,17 @@ pub fn solve_1(input: &str) -> u32 {
         }
     }
 
-    unreachable!()
+    None
 }
 
 /// # Panics
-pub fn solve_2(input: &str) -> usize {
-    type Set<T, K> = BitSet<T, K, { BitSet::with_capacity(141 * 141) }>;
-
-    struct Node<T, K> {
-        position: (usize, usize),
-        direction: (isize, isize),
-        cost: u32,
-        path: Box<Set<T, K>>,
-    }
-
-    impl<T, K> PartialEq for Node<T, K> {
-        fn eq(&self, other: &Self) -> bool {
-            self.position == other.position && self.direction == other.direction
-        }
-    }
-
-    impl<T, K> Eq for Node<T, K> {}
-
-    impl<T, K> Ord for Node<T, K> {
-        fn cmp(&self, other: &Self) -> cmp::Ordering {
-            other.cost.cmp(&self.cost)
-        }
-    }
-
-    impl<T, K> PartialOrd for Node<T, K> {
-        fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-
+#[allow(clippy::cast_possible_truncation)]
+pub fn solve_1(input: &str) -> u32 {
     let maze = input.as_bytes();
     let width = maze.iter().position(|&c| c == b'\n').unwrap();
     let height = (maze.len() + 1) / (width + 1);
 
-    let (r, c) = maze
+    let (start_r, start_c) = maze
         .chunks(width + 1)
         .take(height)
         .enumerate()
@@ -153,81 +139,127 @@ pub fn solve_2(input: &str) -> usize {
         })
         .expect("invalid maze: cannot find `S`");
 
-    let key = |(r, c): &(usize, usize)| r * width + c;
+    let mut costs = [u32::MAX; { WIDTH * HEIGHT * DIMENSION }];
+    costs[costs_key((start_r as u8, start_c as u8), (0i8, 1i8))] = 0u32;
 
-    let mut best_tiles = Set::new(key);
-    best_tiles.insert((r, c)).unwrap();
+    let (cost, _) = dijkstra(
+        &mut costs,
+        maze,
+        &(height, width),
+        (start_r as u8, start_c as u8),
+    )
+    .unwrap();
 
-    let mut best_cost = u32::MAX;
+    cost
+}
 
-    let mut costs = HashMap::with_capacity(140 * 140);
-    costs.insert(((r, c), (0, 1)), 0);
+/// # Panics
+#[allow(clippy::cast_possible_truncation)]
+pub fn solve_2(input: &str) -> usize {
+    struct Visit<'a, T, K, const N: usize> {
+        set: &'a mut BitSet<T, K, N>,
+        visited: &'a mut [u32],
+        maze: &'a [u8],
+        dim: (usize, usize),
+        end: (u8, u8),
+        best_cost: u32,
+    }
 
-    let mut path = Set::new(key);
-    path.insert((r, c)).unwrap();
-
-    let mut queue = BinaryHeap::with_capacity(4096);
-    queue.push(Node {
-        position: (r, c),
-        direction: (0, 1),
-        cost: 0,
-        path: Box::new(path),
-    });
-
-    while let Some(Node {
-        position: (r, c),
-        direction: (dr, dc),
-        cost,
-        path,
-    }) = queue.pop()
+    impl<K, const N: usize> Visit<'_, (u8, u8), K, N>
+    where
+        K: Fn(&(u8, u8)) -> usize,
     {
-        if cost > best_cost || cost > costs.get(&((r, c), (dr, dc))).copied().unwrap_or(u32::MAX) {
-            continue;
-        }
-
-        if maze[r * (width + 1) + c] == b'E' && cost <= best_cost {
-            best_cost = cost;
-
-            best_tiles |= *path;
-
-            continue;
-        }
-
-        for (ndr, ndc) in [(0, 1), (0, -1), (1, 0), (-1, 0)] {
-            match (r.checked_add_signed(ndr), c.checked_add_signed(ndc)) {
-                (Some(r), Some(c))
-                    if r < height && c < width && maze[r * (width + 1) + c] != b'#' =>
-                {
-                    let neighbor_cost = if (ndr, ndc) == (dr, dc) {
-                        0
-                    } else if ndr == -dr || ndc == -dc {
-                        2000
-                    } else {
-                        1000
-                    } + cost
-                        + 1;
-
-                    let e = costs.entry(((r, c), (ndr, ndc))).or_insert(u32::MAX);
-                    if *e >= neighbor_cost {
-                        *e = neighbor_cost;
-
-                        let mut path = path.clone();
-                        path.insert((r, c)).unwrap();
-
-                        queue.push(Node {
-                            position: (r, c),
-                            direction: (ndr, ndc),
-                            cost: neighbor_cost,
-                            path,
-                        });
-                    }
-                }
-                _ => {}
+        fn visit(&mut self, (r, c): (u8, u8), (dr, dc): (i8, i8), cost: u32) -> bool {
+            if (r, c) == self.end {
+                return true;
             }
+
+            let (height, width) = self.dim;
+
+            let mut found = false;
+            for (ndr, ndc) in [(0, 1), (0, -1), (1, 0), (-1, 0)] {
+                match (r.checked_add_signed(ndr), c.checked_add_signed(ndc)) {
+                    (Some(r), Some(c))
+                        if (r as usize) < height
+                            && (c as usize) < width
+                            && self.maze[r as usize * (width + 1) + c as usize] != b'#' =>
+                    {
+                        let neighbor_cost = if (ndr, ndc) == (dr, dc) {
+                            0
+                        } else if ndr == -dr || ndc == -dc {
+                            continue;
+                        } else {
+                            1000
+                        } + cost
+                            + 1;
+
+                        if neighbor_cost > self.best_cost {
+                            continue;
+                        }
+
+                        let e = &mut self.visited[costs_key((r, c), (ndr, ndc))];
+                        if *e >= neighbor_cost {
+                            *e = neighbor_cost;
+                            if self.visit((r, c), (ndr, ndc), neighbor_cost) {
+                                self.set.insert((r, c)).unwrap();
+                                found = true;
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+
+            found
         }
     }
 
-    best_tiles.len()
+    let maze = input.as_bytes();
+    let width = maze.iter().position(|&c| c == b'\n').unwrap();
+    let height = (maze.len() + 1) / (width + 1);
+
+    let (start_r, start_c) = maze
+        .chunks(width + 1)
+        .take(height)
+        .enumerate()
+        .find_map(|(r, row)| {
+            row.iter()
+                .take(width)
+                .position(|&tile| tile == b'S')
+                .map(|c| (r, c))
+        })
+        .expect("invalid maze: cannot find `S`");
+
+    let mut costs = [u32::MAX; { WIDTH * HEIGHT * DIMENSION }];
+    costs[costs_key((start_r as u8, start_c as u8), (0i8, 1i8))] = 0u32;
+
+    let (best_cost, (end_r, end_c)) = dijkstra(
+        &mut costs,
+        maze,
+        &(height, width),
+        (start_r as u8, start_c as u8),
+    )
+    .unwrap();
+
+    let mut set =
+        BitSet::<(u8, u8), _, { BitSet::with_capacity(WIDTH * HEIGHT) }>::new(|&(r, c)| {
+            (r - 1) as usize * width + (c - 1) as usize
+        });
+
+    let mut visit = Visit {
+        set: &mut set,
+        visited: &mut costs,
+        maze,
+        dim: (height, width),
+        end: (end_r, end_c),
+        best_cost,
+    };
+
+    if visit.visit((start_r as u8, start_c as u8), (0, 1), 0) {
+        set.insert((start_r as u8, start_c as u8)).unwrap();
+    }
+
+    set.len()
 }
 
 #[cfg(feature = "input")]
