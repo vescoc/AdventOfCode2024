@@ -15,6 +15,7 @@ pub const HEIGHT: i32 = 103;
 type String = HLString<8>;
 type Vec<T> = HLVec<T, 512>;
 
+#[derive(Debug)]
 pub struct Robot {
     pub position: (i32, i32),
     pub velocity: (i32, i32),
@@ -85,7 +86,10 @@ pub fn solve_1<const WIDTH: i32, const HEIGHT: i32>(input: &str) -> usize {
 pub fn solve_2(input: &str) -> usize {
     const TARGET: &[u8] = b"**********";
 
-    let robots = robots(input).collect::<Vec<_>>();
+    let mut robots = Vec::new();
+    for robot in crate::robots(input) {
+        robots.push(robot).unwrap();
+    }
 
     (0..10000)
         .position(|i| {
@@ -102,7 +106,7 @@ pub fn solve_2(input: &str) -> usize {
                 map[py][px] = b'*';
             }
 
-            map.into_iter()
+            map.iter()
                 .any(|row| (0..row.len() - TARGET.len()).any(|i| row[i..].starts_with(TARGET)))
         })
         .unwrap()

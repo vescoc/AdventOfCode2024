@@ -21,7 +21,7 @@ type String = HLString<1>;
 
 /// # Panics
 pub fn solve_1(input: &str) -> usize {
-    let (mut keys, mut locks) = (Vec::new(), Vec::new());
+    let (mut keys, mut locks) = const { (Vec::new(), Vec::new()) };
     for part in input.split("\n\n") {
         let list = if part.starts_with("#####") {
             &mut locks

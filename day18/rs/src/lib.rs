@@ -144,13 +144,16 @@ pub fn solve_2_bs<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize, co
     input: &str,
     search: impl Fn(&[[u8; WIDTH]; HEIGHT]) -> bool,
 ) -> String {
-    let drops = input
+    let mut drops = Drops::new();
+    for drop in input
         .lines()
         .map(|line| {
             let (x, y) = line.split_once(',').unwrap();
-            (x.parse::<usize>().unwrap(), y.parse::<usize>().unwrap())
+            (x.parse::<u8>().unwrap(), y.parse::<u8>().unwrap())
         })
-        .collect::<Drops<_>>();
+    {
+        drops.push(drop).unwrap();
+    }
 
     let mut min = CUT;
     let mut max = drops.len();
@@ -158,14 +161,14 @@ pub fn solve_2_bs<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize, co
 
     let mut grid = [[b'.'; WIDTH]; HEIGHT];
     for (x, y) in drops.iter().take(middle).copied() {
-        grid[y][x] = b'#';
+        grid[y as usize][x as usize] = b'#';
     }
 
     while min != middle {
         if search(&grid) {
             let new_middle = (middle + max) / 2;
             for (x, y) in drops.iter().skip(middle).take(new_middle - middle).copied() {
-                grid[y][x] = b'#';
+                grid[y as usize][x as usize] = b'#';
             }
             min = middle;
             middle = new_middle;
@@ -177,7 +180,7 @@ pub fn solve_2_bs<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize, co
                 .take(middle - new_middle)
                 .copied()
             {
-                grid[y][x] = b'.';
+                grid[y as usize][x as usize] = b'.';
             }
             max = middle;
             middle = new_middle;

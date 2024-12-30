@@ -14,22 +14,24 @@ pub const INPUT: &str = "";
 
 struct CountHashMap<K, T>(HashMap<K, T>);
 
-impl<K, T> Default for CountHashMap<K, T> {
-    fn default() -> Self {
+impl<K, V> CountHashMap<K, V> {
+    const fn new() -> Self {
         Self(HashMap::new())
     }
 }
 
-impl core::iter::Extend<u32> for CountHashMap<u32, u32> {
-    fn extend<T: IntoIterator<Item = u32>>(&mut self, i: T) {
-        for value in i {
-            match self.0.entry(value) {
-                Entry::Occupied(mut v) => {
-                    *v.get_mut() += 1;
-                }
-                Entry::Vacant(v) => {
-                    v.insert(1).unwrap();
-                }
+impl<K> CountHashMap<K, u32>
+where K: Eq + core::hash::Hash,
+{
+    fn add(&mut self, value: K) -> Result<(), u32> {
+        match self.0.entry(value) {
+            Entry::Occupied(mut v) => {
+                *v.get_mut() += 1;
+                Ok(())
+            }
+            Entry::Vacant(v) => {
+                v.insert(1)?;
+                Ok(())
             }
         }
     }
@@ -45,7 +47,9 @@ impl<K, T> core::ops::Deref for CountHashMap<K, T> {
 
 /// # Panics
 pub fn solve_1(input: &str) -> u32 {
-    let (mut line1, mut line2) = input
+    let mut line1 = Vec::new();
+    let mut line2 = Vec::new();
+    for (v1, v2) in input
         .lines()
         .map(|line| {
             let mut parts = line.split_whitespace();
@@ -55,21 +59,26 @@ pub fn solve_1(input: &str) -> u32 {
                 parts.next().unwrap().parse::<u32>().unwrap(),
             )
         })
-        .collect::<(Vec<_>, Vec<_>)>();
+    {
+        line1.push(v1).unwrap();
+        line2.push(v2).unwrap();
+    }
 
     line1.sort_unstable();
     line2.sort_unstable();
 
     line1
-        .into_iter()
-        .zip(line2)
-        .map(|(a, b)| a.abs_diff(b))
+        .iter()
+        .zip(&line2)
+        .map(|(a, &b)| a.abs_diff(b))
         .sum()
 }
 
 /// # Panics
 pub fn solve_2(input: &str) -> u32 {
-    let (line1, line2) = input
+    let mut line1 = Vec::new();
+    let mut line2 = CountHashMap::new();
+    for (v1, v2) in input
         .lines()
         .map(|line| {
             let mut parts = line.split_whitespace();
@@ -79,11 +88,14 @@ pub fn solve_2(input: &str) -> u32 {
                 parts.next().unwrap().parse::<u32>().unwrap(),
             )
         })
-        .collect::<(Vec<_>, CountHashMap<_, _>)>();
+    {
+        line1.push(v1).unwrap();
+        line2.add(v2).unwrap();
+    }
 
     line1
-        .into_iter()
-        .map(|id| id * line2.get(&id).copied().unwrap_or_default())
+        .iter()
+        .map(|id| id * line2.get(id).copied().unwrap_or_default())
         .sum()
 }
 

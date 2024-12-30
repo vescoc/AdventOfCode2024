@@ -64,7 +64,7 @@ fn key((a, b, c, d): &(i32, i32, i32, i32)) -> usize {
 pub fn solve_2_par(input: &str) -> u16 {
     use core::sync::atomic::{AtomicU16, Ordering};
 
-    let map = [const { AtomicU16::new(0) }; { SIZE }];
+    let map = const { [const { AtomicU16::new(0) }; { SIZE }] };
     input.par_lines().for_each(|line| {
         let mut inserted = BitSet::<_, _, { BitSet::with_capacity(SIZE) }>::new(key);
         for ((a, b, c, d), bananas) in Generator(line.parse().unwrap())

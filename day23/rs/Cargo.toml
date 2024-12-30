@@ -15,6 +15,7 @@ day = 23
 
 [dependencies]
 heapless = "0.8.0"
+bitset = { path = "../../common/rs/bitset" }
 rayon = { version = "1.10.0", optional = true }
 
 [dev-dependencies]
@@ -29,6 +30,7 @@ harness = false
 
 [lints.clippy]
 pedantic = "deny"
+large_stack_frames = "deny"
 
 [profile.release]
 debug = true

@@ -84,15 +84,15 @@ where
         }
 
         (facing, (r, c)) = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-            .into_iter()
+            .iter()
             .enumerate()
             .cycle()
             .skip(facing)
             .take(4)
             .find_map(|(facing, (dr, dc))| {
                 let (r, c) = (
-                    r.checked_add_signed(dr).unwrap(),
-                    c.checked_add_signed(dc).unwrap(),
+                    r.checked_add_signed(*dr).unwrap(),
+                    c.checked_add_signed(*dc).unwrap(),
                 );
 
                 if map[r * (width + 1) + c] == b'#' || (r, c) == obstruction {
@@ -107,6 +107,7 @@ where
 
 /// # Panics
 #[cfg(feature = "parallel")]
+#[allow(clippy::large_stack_frames)]
 pub fn solve_2_par(input: &str) -> usize {
     let map = input.as_bytes();
     let width = map.iter().position(|&c| c == b'\n').unwrap();

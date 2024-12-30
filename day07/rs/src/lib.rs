@@ -41,12 +41,16 @@ fn solve<P: Part>(input: &str) -> u64 {
             let mut parts = line.split(": ");
 
             let target = parts.next().unwrap().parse::<u64>().unwrap();
-            let numbers = parts
+            
+            let mut numbers = Vec::new();
+            for v in parts
                 .next()
                 .unwrap()
                 .split_whitespace()
                 .map(|number| number.parse::<u64>().unwrap())
-                .collect::<Vec<_>>();
+            {
+                numbers.push(v).unwrap();
+            }
 
             if let Some((&a, ax)) = numbers.split_first() {
                 let Some((&b, bx)) = ax.split_first() else {

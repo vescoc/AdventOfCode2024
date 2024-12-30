@@ -21,29 +21,30 @@ type Point = (usize, usize);
 
 struct Antennas(HashMap<u8, Vec<Point>>);
 
+impl Antennas {
+    const fn new() -> Self {
+        Self(HashMap::new())
+    }
+    
+    fn add(&mut self, key: u8, value: &Point) -> Result<(), Point> {
+        match self.0.entry(key) {
+            Entry::Occupied(mut v) => {
+                v.get_mut().push(*value)?;
+            }
+            Entry::Vacant(v) => {
+                v.insert(Vec::from_slice(&[*value]).map_err(|()| *value)?).map_err(|_| *value)?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
 impl core::ops::Deref for Antennas {
     type Target = HashMap<u8, Vec<Point>>;
 
     fn deref(&self) -> &Self::Target {
         &self.0
-    }
-}
-
-impl FromIterator<(u8, Point)> for Antennas {
-    fn from_iter<I: IntoIterator<Item = (u8, Point)>>(i: I) -> Self {
-        let mut antennas: HashMap<_, Vec<_>> = HashMap::new();
-        for (key, value) in i {
-            match antennas.entry(key) {
-                Entry::Occupied(mut v) => {
-                    v.get_mut().push(value).unwrap();
-                }
-                Entry::Vacant(v) => {
-                    v.insert(Vec::from_slice(&[value]).unwrap()).unwrap();
-                }
-            }
-        }
-
-        Self(antennas)
     }
 }
 
@@ -92,7 +93,8 @@ where
     let width = map.iter().position(|&c| c == b'\n').unwrap();
     let height = (map.len() + 1) / (width + 1);
     
-    let antennas = map
+    let mut antennas = Antennas::new();
+    for (tile, point) in map
         .chunks(width + 1)
         .enumerate()
         .flat_map(|(r, row)| {
@@ -105,7 +107,9 @@ where
                 }
             })
         })
-        .collect::<Antennas>();
+    {
+        antennas.add(tile, &point).unwrap();
+    }
 
     let mut antinodes =
         BitSet::<Point, _, SET_SIZE>::new(|(r, c)| r * width + c);

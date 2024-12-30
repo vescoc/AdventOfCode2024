@@ -27,9 +27,12 @@ pub fn solve_2(input: &str) -> u64 {
 
 /// # Panics
 pub fn solve_1_dp(input: &str) -> usize {
-    let (patterns, designs) = input.split_once("\n\n").unwrap();
+    let (ps, designs) = input.split_once("\n\n").unwrap();
 
-    let patterns = patterns.split(", ").collect::<Vec<_>>();
+    let mut patterns = Vec::new();
+    for pattern in ps.split(", ") {
+        patterns.push(pattern).unwrap();
+    }
 
     let have_options = |design: &str| {
         let mut options = [0u64; 64];
@@ -98,9 +101,12 @@ pub fn solve_1_r(input: &str) -> usize {
         }
     }
 
-    let (patterns, designs) = input.split_once("\n\n").unwrap();
+    let (ps, designs) = input.split_once("\n\n").unwrap();
 
-    let patterns = patterns.split(", ").collect::<Vec<_>>();
+    let mut patterns = Vec::new();
+    for pattern in ps.split(", ") {
+        patterns.push(pattern).unwrap();
+    }
 
     #[cfg(feature = "parallel")]
     let lines = designs.par_lines();

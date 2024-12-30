@@ -15,6 +15,7 @@ pub const INPUT: &str = include_str!("../../input");
 pub const INPUT: &str = "";
 
 /// # Panics
+#[allow(clippy::cast_possible_truncation)]
 pub fn solve_1(input: &str) -> u64 {
     let mut occupied = Disk::new();
     let mut free = Free::new();
@@ -26,7 +27,7 @@ pub fn solve_1(input: &str) -> u64 {
         }
 
         if i % 2 == 0 {
-            occupied.push_back((i / 2, idx, size)).unwrap();
+            occupied.push_back((i as u16 / 2, idx, size)).unwrap();
         } else {
             free.push_back((idx, size)).unwrap();
         }
@@ -74,26 +75,26 @@ pub fn solve_1(input: &str) -> u64 {
 
     occupied
         .iter()
-        .flat_map(|(id, idx, size)| (*idx..*idx + u32::from(*size)).map(move |i| *id as u64 * u64::from(i)))
+        .flat_map(|(id, idx, size)| (*idx..*idx + u32::from(*size)).map(move |i| u64::from(*id) * u64::from(i)))
         .sum()
 }
 
 /// # Panics
-#[allow(clippy::too_many_lines)]
+#[allow(clippy::too_many_lines, clippy::cast_possible_truncation)]
 pub fn solve_2(input: &str) -> u64 {
     #[derive(Debug)]
     struct Info {
-        id: usize,
-        idx: usize,
-        size: usize,
+        id: u16,
+        index: u32,
+        size: u8,
     }
 
-    let mut free_space_heaps = [const { BinaryHeap::new() }; 9];
-    let mut occupied_heap = Heap::new();
+    let mut free_space_heaps = const { [ const { BinaryHeap::new() }; 9] };
+    let mut occupied_heap = const { Heap::new() };
 
-    let mut idx = 0;
+    let mut index = 0u32;
     for (i, size) in input.trim().chars().enumerate() {
-        let size = (size as u32 - '0' as u32) as usize;
+        let size = (size as u32 - '0' as u32) as u8;
         if size == 0 {
             continue;
         }
@@ -101,43 +102,43 @@ pub fn solve_2(input: &str) -> u64 {
         if i % 2 == 0 {
             occupied_heap
                 .push(Info {
-                    id: i / 2,
-                    idx,
+                    id: i as u16 / 2,
+                    index,
                     size,
                 })
                 .unwrap();
         } else {
-            free_space_heaps[size - 1].push(idx).unwrap();
+            free_space_heaps[size as usize - 1].push(index).unwrap();
         }
 
-        idx += size;
+        index += u32::from(size);
     }
 
-    let find_blocks = |free_space_heaps: &[BinaryHeap<usize>], occupied_heap: &[Info]| {
-        let (mut target_occupied_idx, mut target_free_block_idx, mut target_free_block_size) =
-            (usize::MAX, usize::MAX, usize::MAX);
+    let find_blocks = |free_space_heaps: &[BinaryHeap<u32>], occupied_heap: &[Info]| {
+        let (mut target_occupied_index, mut target_free_block_index, mut target_free_block_size) =
+            (u32::MAX, u32::MAX, u8::MAX);
 
         for (
-            candidate_occupied_idx,
+            candidate_occupied_index,
             &Info {
-                idx: block_idx,
+                index: block_index,
                 size: block_size,
                 ..
             },
         ) in occupied_heap.iter().enumerate().rev()
         {
-            if target_free_block_idx < block_idx {
+            if target_free_block_index < block_index {
                 break;
             }
 
-            if let Some((free_block_idx, free_block_size)) = free_space_heaps
+            if let Some((free_block_index, free_block_size)) = free_space_heaps
                 .iter()
                 .enumerate()
-                .skip(block_size - 1)
+                .skip(block_size as usize - 1)
                 .filter_map(|(free_block_size, heap)| {
                     heap.peek().and_then(|&v| {
-                        if v < block_idx {
-                            Some((v, free_block_size + 1))
+                        if v < block_index {
+                            Some((v, free_block_size as u8 + 1))
                         } else {
                             None
                         }
@@ -146,17 +147,17 @@ pub fn solve_2(input: &str) -> u64 {
                 .min_by_key(|(k, _)| *k)
             {
                 (
-                    target_occupied_idx,
-                    target_free_block_idx,
+                    target_occupied_index,
+                    target_free_block_index,
                     target_free_block_size,
-                ) = (candidate_occupied_idx, free_block_idx, free_block_size);
+                ) = (candidate_occupied_index as u32, free_block_index, free_block_size);
             }
         }
 
-        if target_occupied_idx != usize::MAX {
+        if target_occupied_index != u32::MAX {
             return Some((
-                target_occupied_idx,
-                target_free_block_idx,
+                target_occupied_index,
+                target_free_block_index,
                 target_free_block_size,
             ));
         }
@@ -164,28 +165,28 @@ pub fn solve_2(input: &str) -> u64 {
         None
     };
 
-    let mut moved_blocks = Heap::new();
-    while let Some((block_idx, free_block_idx, free_block_size)) =
+    let mut moved_blocks = const { Heap::new() };
+    while let Some((block_index, free_block_index, free_block_size)) =
         find_blocks(&free_space_heaps, &occupied_heap)
     {
         let Info {
             id,
             size: moved_size,
             ..
-        } = occupied_heap.remove(block_idx);
+        } = occupied_heap.remove(block_index as usize);
 
         moved_blocks
             .push(Info {
                 id,
-                idx: free_block_idx,
+                index: free_block_index,
                 size: moved_size,
             })
             .unwrap();
 
-        free_space_heaps[free_block_size - 1].pop();
+        free_space_heaps[free_block_size as usize - 1].pop();
         if free_block_size > moved_size {
-            free_space_heaps[free_block_size - moved_size - 1]
-                .push(free_block_idx + moved_size)
+            free_space_heaps[free_block_size as usize - moved_size as usize - 1]
+                .push(free_block_index + u32::from(moved_size))
                 .unwrap();
         }
     }
@@ -193,7 +194,7 @@ pub fn solve_2(input: &str) -> u64 {
     moved_blocks
         .iter()
         .chain(&occupied_heap)
-        .flat_map(|Info { id, idx, size }| (*idx..*idx + *size).map(move |i| *id as u64 * i as u64))
+        .flat_map(|Info { id, index, size }| (*index..*index + u32::from(*size)).map(move |i| u64::from(*id) * u64::from(i)))
         .sum()
 }
 

@@ -12,12 +12,13 @@ pub const INPUT: &str = include_str!("../../input");
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
 
+use heapless::Vec as HLVec;
+
+type Vec<T> = HLVec<T, { 4096 * 4 }>;
+
 /// # Panics
+#[allow(clippy::cast_possible_truncation)]
 pub fn solve_v<const MIN_SAVING: usize, const CHEAT_LEN: usize>(input: &str) -> usize {
-    use heapless::Vec as HLVec;
-
-    type Vec<T> = HLVec<T, { 4096 * 4 }>;
-
     let map = input.as_bytes();
     let width = map.iter().position(|&tile| tile == b'\n').unwrap();
     let height = (map.len() + 1) / (width + 1);
@@ -34,44 +35,51 @@ pub fn solve_v<const MIN_SAVING: usize, const CHEAT_LEN: usize>(input: &str) -> 
         })
         .unwrap();
 
-    let mut visited =
-        BitSet::<_, _, { BitSet::with_capacity(160 * 160) }>::new(|(r, c)| r * (width + 1) + c);
-    visited.insert((start_r, start_c)).unwrap();
-
-    let path = (0..).scan(((start_r, start_c), false), |((r, c), done), i| {
-        if *done {
-            return None;
-        }
-
-        if map[*r * (width + 1) + *c] == b'E' {
-            *done = true;
-            Some(((*r, *c), i))
-        } else {
-            let res = ((*r, *c), i);
-
-            (*r, *c) = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-                .into_iter()
-                .find_map(
-                    |(dr, dc)| match (r.checked_add_signed(dr), c.checked_add_signed(dc)) {
-                        (Some(nr), Some(nc))
-                            if nr < height && nc < width && map[nr * (width + 1) + nc] != b'#' =>
-                        {
-                            if visited.insert((nr, nc)).unwrap() {
-                                None
-                            } else {
-                                Some((nr, nc))
-                            }
-                        }
-                        _ => None,
-                    },
-                )
-                .unwrap();
-
-            Some(res)
-        }
+    let mut visited = BitSet::<_, _, { BitSet::with_capacity(141 * 142) }>::new(|(r, c)| {
+        *r as usize * (width + 1) + *c as usize
     });
+    visited.insert((start_r as u8, start_c as u8)).unwrap();
+
+    let path_iter = (0u16..).scan(
+        ((start_r as u8, start_c as u8), false),
+        |((r, c), done), i| {
+            if *done {
+                return None;
+            }
+
+            if map[*r as usize * (width + 1) + *c as usize] == b'E' {
+                *done = true;
+                Some(((*r, *c), i))
+            } else {
+                let res = ((*r, *c), i);
+
+                (*r, *c) = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+                    .into_iter()
+                    .find_map(|(dr, dc)| {
+                        match (r.checked_add_signed(dr), c.checked_add_signed(dc)) {
+                            (Some(nr), Some(nc))
+                                if (nr as usize) < height
+                                    && (nc as usize) < width
+                                    && map[nr as usize * (width + 1) + nc as usize] != b'#' =>
+                            {
+                                if visited.insert((nr, nc)).unwrap() {
+                                    None
+                                } else {
+                                    Some((nr, nc))
+                                }
+                            }
+                            _ => None,
+                        }
+                    })
+                    .unwrap();
+
+                Some(res)
+            }
+        },
+    );
+
     let mut main_path = Vec::new();
-    for v in path {
+    for v in path_iter {
         main_path.push(v).unwrap();
     }
 
@@ -87,11 +95,11 @@ pub fn solve_v<const MIN_SAVING: usize, const CHEAT_LEN: usize>(input: &str) -> 
         .map(|((r, c), i)| {
             main_path
                 .iter()
-                .skip(i + MIN_SAVING + 1)
+                .skip(*i as usize + MIN_SAVING + 1)
                 .filter_map(|((tr, tc), ti)| {
-                    let distance = r.abs_diff(*tr) + c.abs_diff(*tc);
+                    let distance = r.abs_diff(*tr) as usize + c.abs_diff(*tc) as usize;
                     if distance <= CHEAT_LEN {
-                        let cheat_path_len = path_len - ti + i + distance;
+                        let cheat_path_len = path_len - *ti as usize + *i as usize + distance;
                         let saving = path_len.saturating_sub(cheat_path_len);
                         if saving >= MIN_SAVING {
                             Some(())
@@ -108,11 +116,8 @@ pub fn solve_v<const MIN_SAVING: usize, const CHEAT_LEN: usize>(input: &str) -> 
 }
 
 /// # Panics
+#[allow(clippy::cast_possible_truncation)]
 pub fn solve_m<const MIN_SAVING: usize, const CHEAT_LEN: usize>(input: &str) -> usize {
-    use heapless::FnvIndexMap;
-
-    type Map<K, V> = FnvIndexMap<K, V, { 4096 * 4 }>;
-
     let map = input.as_bytes();
     let width = map.iter().position(|&tile| tile == b'\n').unwrap();
     let height = (map.len() + 1) / (width + 1);
@@ -129,70 +134,80 @@ pub fn solve_m<const MIN_SAVING: usize, const CHEAT_LEN: usize>(input: &str) -> 
         })
         .unwrap();
 
-    let mut visited =
-        BitSet::<_, _, { BitSet::with_capacity(160 * 160) }>::new(|(r, c)| r * (width + 1) + c);
-    visited.insert((start_r, start_c)).unwrap();
-
-    let path = (0..).scan(((start_r, start_c), false), |((r, c), done), i| {
-        if *done {
-            return None;
-        }
-
-        if map[*r * (width + 1) + *c] == b'E' {
-            *done = true;
-            Some(((*r, *c), i))
-        } else {
-            let res = ((*r, *c), i);
-
-            (*r, *c) = [(0, 1), (0, -1), (1, 0), (-1, 0)]
-                .into_iter()
-                .find_map(
-                    |(dr, dc)| match (r.checked_add_signed(dr), c.checked_add_signed(dc)) {
-                        (Some(nr), Some(nc))
-                            if nr < height && nc < width && map[nr * (width + 1) + nc] != b'#' =>
-                        {
-                            if visited.insert((nr, nc)).unwrap() {
-                                None
-                            } else {
-                                Some((nr, nc))
-                            }
-                        }
-                        _ => None,
-                    },
-                )
-                .unwrap();
-
-            Some(res)
-        }
+    let mut visited = BitSet::<_, _, { BitSet::with_capacity(141 * 142) }>::new(|(r, c)| {
+        *r as usize * (width + 1) + *c as usize
     });
-    let mut main_path = Map::new();
-    for (k, v) in path {
-        main_path.insert(k, v).unwrap();
+    visited.insert((start_r as u8, start_c as u8)).unwrap();
+
+    let path_iter = (0u16..).scan(
+        ((start_r as u8, start_c as u8), false),
+        |((r, c), done), i| {
+            if *done {
+                return None;
+            }
+
+            if map[*r as usize * (width + 1) + *c as usize] == b'E' {
+                *done = true;
+                Some(((*r, *c), i))
+            } else {
+                let res = ((*r, *c), i);
+
+                (*r, *c) = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+                    .into_iter()
+                    .find_map(|(dr, dc)| {
+                        match (r.checked_add_signed(dr), c.checked_add_signed(dc)) {
+                            (Some(nr), Some(nc))
+                                if (nr as usize) < height
+                                    && (nc as usize) < width
+                                    && map[nr as usize * (width + 1) + nc as usize] != b'#' =>
+                            {
+                                if visited.insert((nr, nc)).unwrap() {
+                                    None
+                                } else {
+                                    Some((nr, nc))
+                                }
+                            }
+                            _ => None,
+                        }
+                    })
+                    .unwrap();
+
+                Some(res)
+            }
+        },
+    );
+
+    let mut path = Vec::new();
+    let mut main_path = [[0u16; 141]; 142];
+    for ((r, c), v) in path_iter {
+        main_path[r as usize][c as usize] = v;
+        path.push(((r, c), v)).unwrap();
     }
 
-    let path_len = main_path.len();
+    let path_len = path.len();
 
     #[cfg(feature = "parallel")]
-    let steps = main_path.iter().par_bridge();
+    let steps = path.par_iter();
 
     #[cfg(not(feature = "parallel"))]
-    let steps = main_path.iter();
+    let steps = path.iter();
 
     let main_path = &main_path; // borrow checker :PPP
     steps
-        .map(|(&(r, c), &i)| {
-            let (r, c) = (r, c);
-            (r.saturating_sub(CHEAT_LEN)..(r + CHEAT_LEN + 1).min(height))
+        .map(|((r, c), i)| {
+            ((*r as usize).saturating_sub(CHEAT_LEN)..(*r as usize + CHEAT_LEN + 1).min(height))
                 .flat_map(move |tr| {
-                    (c.saturating_sub(CHEAT_LEN)..(c + CHEAT_LEN + 1).min(width)).filter_map(
-                        move |tc| {
-                            if (r, c) == (tr, tc) {
+                    ((*c as usize).saturating_sub(CHEAT_LEN)
+                        ..(*c as usize + CHEAT_LEN + 1).min(width))
+                        .filter_map(move |tc| {
+                            if (*r, *c) == (tr as u8, tc as u8) {
                                 return None;
                             }
 
-                            let distance = r.abs_diff(tr) + c.abs_diff(tc);
+                            let distance = (*r as usize).abs_diff(tr) + (*c as usize).abs_diff(tc);
                             if distance <= CHEAT_LEN && map[tr * (width + 1) + tc] != b'#' {
-                                let cheat_path_len = path_len - main_path[&(tr, tc)] + i + distance;
+                                let cheat_path_len =
+                                    path_len - main_path[tr][tc] as usize + *i as usize + distance;
                                 let saving = path_len.saturating_sub(cheat_path_len);
                                 if saving >= MIN_SAVING {
                                     return Some((cheat_path_len, saving));
@@ -200,8 +215,7 @@ pub fn solve_m<const MIN_SAVING: usize, const CHEAT_LEN: usize>(input: &str) -> 
                             }
 
                             None
-                        },
-                    )
+                        })
                 })
                 .count()
         })

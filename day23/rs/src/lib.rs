@@ -4,6 +4,8 @@
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
+use bitset::BitSet;
+
 use heapless::{FnvIndexMap, FnvIndexSet, String as HLString, Vec as HLVec};
 
 #[cfg(feature = "input")]
@@ -38,14 +40,16 @@ pub fn solve_1(input: &str) -> usize {
         })
     }
 
-    let mut edges = [[false; WIDTH * WIDTH]; WIDTH * WIDTH];
-
-    let mut ts = NodeSet::new();
+    let mut edges =
+        BitSet::<_, _, { BitSet::with_capacity(WIDTH * WIDTH * WIDTH * WIDTH) }>::new(|(r, c)| {
+            r * WIDTH * WIDTH + c
+        });
+    let mut ts = BitSet::<_, _, { BitSet::with_capacity(WIDTH * WIDTH) }>::new(|i| *i);
     for (a, b) in input.lines().map(|line| line.split_once('-').unwrap()) {
         let (id_a, id_b) = (id(a), id(b));
 
-        edges[id_a][id_b] = true;
-        edges[id_b][id_a] = true;
+        edges.insert((id_a, id_b)).unwrap();
+        edges.insert((id_b, id_a)).unwrap();
 
         if a.starts_with('t') {
             ts.insert(id_a).unwrap();
@@ -55,29 +59,34 @@ pub fn solve_1(input: &str) -> usize {
         }
     }
 
+    let mut result = Set::new();
     let edges = &edges; // !!! borrow checker + move :'(
-    ts.iter()
-        .flat_map(|&t_id| {
-            edges[t_id]
-                .iter()
-                .enumerate()
-                .filter_map(move |(a_id, &v)| if v { Some((t_id, a_id)) } else { None })
+    (0..WIDTH * WIDTH)
+        .filter(|t_id| ts.contains(t_id).unwrap())
+        .flat_map(|t_id| {
+            (0..WIDTH * WIDTH).filter_map(move |a_id| {
+                if edges.contains(&(t_id, a_id)).unwrap() {
+                    Some((t_id, a_id))
+                } else {
+                    None
+                }
+            })
         })
         .flat_map(|(t_id, a_id)| {
-            edges[t_id]
-                .iter()
-                .enumerate()
-                .skip(a_id + 1)
-                .filter_map(move |(b_id, &v)| {
-                    if v && edges[a_id][b_id] {
-                        Some(set(&[t_id, a_id, b_id]))
-                    } else {
-                        None
-                    }
-                })
+            (0..WIDTH * WIDTH).skip(a_id + 1).filter_map(move |b_id| {
+                if edges.contains(&(t_id, b_id)).unwrap() && edges.contains(&(a_id, b_id)).unwrap()
+                {
+                    Some(set(&[t_id, a_id, b_id]))
+                } else {
+                    None
+                }
+            })
         })
-        .collect::<Set<_>>()
-        .len()
+        .for_each(|set| {
+            result.insert(set).unwrap();
+        });
+
+    result.len()
 }
 
 /// # Panics
@@ -85,21 +94,21 @@ pub fn solve_2(input: &str) -> String {
     let mut nodes = NodeSet::new();
     let mut id2node = NodeMap::new();
 
-    let mut edges = [[false; WIDTH * WIDTH]; WIDTH * WIDTH];
-
+    let mut edges =
+        BitSet::<_, _, { BitSet::with_capacity(WIDTH * WIDTH * WIDTH * WIDTH) }>::new(|(r, c)| {
+            r * WIDTH * WIDTH + c
+        });
     for (a, b) in input.lines().map(|line| line.split_once('-').unwrap()) {
-        assert!(a != b);
-
         let (id_a, id_b) = (id(a), id(b));
 
-        id2node.insert(id_a, a).unwrap();
-        id2node.insert(id_b, b).unwrap();
+        edges.insert((id_a, id_b)).unwrap();
+        edges.insert((id_b, id_a)).unwrap();
 
         nodes.insert(id_a).unwrap();
         nodes.insert(id_b).unwrap();
 
-        edges[id_a][id_b] = true;
-        edges[id_b][id_a] = true;
+        id2node.insert(id_a, a).unwrap();
+        id2node.insert(id_b, b).unwrap();
     }
 
     #[cfg(feature = "parallel")]
@@ -112,12 +121,12 @@ pub fn solve_2(input: &str) -> String {
         .map(|&start_id| {
             let mut group = Vec::try_from([start_id].as_slice()).unwrap();
             for candidate_id in
-                edges[start_id]
-                    .iter()
-                    .enumerate()
-                    .filter_map(|(id, &v)| if v { Some(id) } else { None })
+                (0..WIDTH * WIDTH).filter(|id| edges.contains(&(start_id, *id)).unwrap())
             {
-                if group.iter().all(|&id| edges[id][candidate_id]) {
+                if group
+                    .iter()
+                    .all(|&id| edges.contains(&(id, candidate_id)).unwrap())
+                {
                     group.push(candidate_id).unwrap();
                 }
             }

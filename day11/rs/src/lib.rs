@@ -42,17 +42,6 @@ impl Stones {
     }
 }
 
-impl FromIterator<(u64, u64)> for Stones {
-    fn from_iter<I: IntoIterator<Item = (u64, u64)>>(i: I) -> Self {
-        let mut stones = Self::new();
-        for (k, n) in i {
-            stones.add(k, n);
-        }
-
-        stones
-    }
-}
-
 fn split_if_even(stone: u64) -> Option<(u64, u64)> {
     stone.checked_ilog10().and_then(|digits| {
         if digits % 2 == 1 {
@@ -66,14 +55,20 @@ fn split_if_even(stone: u64) -> Option<(u64, u64)> {
 
 /// # Panics
 fn solve(input: &str, mut blinks: usize) -> u64 {
-    let mut stones = [
-        input
-            .split_whitespace()
-            .map(|stone| (stone.parse::<u64>().unwrap(), 1))
-            .collect::<Stones>(),
-        Stones::new(),
-    ];
+    let mut stones = const {
+        [
+            Stones::new(),
+            Stones::new(),
+        ]
+    };
 
+    for (k, v) in input
+        .split_whitespace()
+        .map(|stone| (stone.parse::<u64>().unwrap(), 1))
+    {
+        stones[0].add(k, v);
+    }
+    
     let mut i = 0;
     while blinks > 0 {
         i = (i + 1) % 2;

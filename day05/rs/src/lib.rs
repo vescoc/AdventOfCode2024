@@ -6,11 +6,13 @@ use heapless::{Vec as HLVec, FnvIndexSet};
 #[cfg(feature = "parallel")]
 use rayon::prelude::*;
 
+type Num = u8;
+
 type Vec<T> = HLVec<T, 32>;
 
 type HashSet<T> = FnvIndexSet<T, 2048>;
 
-type Rules = HashSet<(u32, u32)>;
+type Rules = HashSet<(Num, Num)>;
 
 #[cfg(feature = "input")]
 pub const INPUT: &str = include_str!("../../input");
@@ -18,7 +20,7 @@ pub const INPUT: &str = include_str!("../../input");
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = "";
 
-fn is_valid(rules: &Rules, pages: &[u32]) -> bool {
+fn is_valid(rules: &Rules, pages: &[Num]) -> bool {
     (0..pages.len() - 1).all(|i| {
         pages
             .iter()
@@ -29,7 +31,7 @@ fn is_valid(rules: &Rules, pages: &[u32]) -> bool {
     })
 }
 
-fn reorder(rules: &Rules, pages: &mut [u32]) {
+fn reorder(rules: &Rules, pages: &mut [Num]) {
     for i in 1..pages.len() {
         let (prefix, postfix) = pages.split_at_mut(i);
         let x = &mut prefix[i - 1];
@@ -45,22 +47,25 @@ fn reorder(rules: &Rules, pages: &mut [u32]) {
 
 fn solve<F>(input: &str, check: F) -> u32
 where
-    F: Fn(&Rules, Vec<u32>) -> Option<u32> + Sync + Send,
+    F: Fn(&Rules, Vec<Num>) -> Option<Num> + Sync + Send,
 {
     let mut parts = input.split("\n\n");
 
-    let rules = parts
+    let mut rules = Rules::new();
+    for (k, v) in parts
         .next()
         .unwrap()
         .lines()
         .map(|line| {
             let mut parts = line.split('|');
             (
-                parts.next().unwrap().parse::<u32>().unwrap(),
-                parts.next().unwrap().parse::<u32>().unwrap(),
+                parts.next().unwrap().parse::<Num>().unwrap(),
+                parts.next().unwrap().parse::<Num>().unwrap(),
             )
         })
-        .collect::<Rules>();
+    {
+        rules.insert((k, v)).unwrap();
+    }
 
     #[cfg(feature = "parallel")]
     let lines = parts.next().unwrap().par_lines();
@@ -72,10 +77,10 @@ where
         .filter_map(|line| {
             let pages = line
                 .split(',')
-                .map(|page| page.parse::<u32>().unwrap())
+                .map(|page| page.parse::<Num>().unwrap())
                 .collect::<Vec<_>>();
 
-            check(&rules, pages)
+            check(&rules, pages).map(u32::from)
         })
         .sum()
 }
