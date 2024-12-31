@@ -359,7 +359,7 @@ where
                                         defmt::warn!("unsupported day");
                                         
                                         result.clear();
-                                        write!(&mut result, "unsupported day").unwrap();
+                                        write!(&mut result, "unsupported day\r\n").unwrap();
 
                                         send_response(&mut usb_device, &mut serial, result.as_str().as_bytes());
                                         

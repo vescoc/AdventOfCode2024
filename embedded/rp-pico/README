@@ -1,14 +1,14 @@
 # Advent of Code 2024 on rp-pico2
 
 ## OpenOCD
-Check adapter serial.
+Check serial adapter string.
 ```bash
-openocd -s tcl -f interface/cmsis-dap.cfg -f target/rp2350.cfg -c "bindto 0.0.0.0" -c "adapter serial E6616407E350292F" -c "adapter speed 5000"
+openocd -s tcl -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "bindto 0.0.0.0" -c "adapter serial E6616407E3791429" -c "adapter speed 5000"
 ```
 
 ## GDB
 ```raw
-file target/thumbv8m.main-none-eabihf/release/aoc2024-rp-pico2
+file target/thumbv6m-none-eabi/release/aoc2024-rp-pico
 
 target extended-remote openocd:3333
 
@@ -25,7 +25,7 @@ continue
 
 ## Defmt
 ```bash
-nc openocd 8765 | defmt-print -e target/thumbv8m.main-none-eabihf/release/aoc2024-rp-pico2
+nc openocd 8765 | defmt-print -e target/thumbv6m-none-eabi/release/aoc2024-rp-pico
 ```
 
 ### Device
