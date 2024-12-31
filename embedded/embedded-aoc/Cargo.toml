@@ -1,0 +1,179 @@
+[package]
+name = "embedded-aoc"
+version = "0.1.0"
+edition = "2021"
+authors = ["vescoc"]
+homepage = "urn:private"
+
+[features]
+default = ["stack1k"]
+
+stack400k = [
+        "stack350k",
+        
+        "day16",
+]
+
+stack350k = [
+        "stack300k",
+        
+        "day09",
+]
+
+stack300k = [
+        "stack250k",
+        
+        "day22",
+]
+
+stack250k = [
+        "stack150k",
+        
+        "day11",
+]
+
+stack150k = [
+        "stack120k",
+        
+        "day23",
+]
+
+stack120k = [
+        "stack100k",
+        
+        "day20",
+]
+
+stack100k = [
+        "stack50k",
+        
+        "day18",
+        "day19",
+        "day24",
+]
+
+stack50k = [
+        "stack40k",
+        
+        "day25",
+]
+
+stack40k = [
+        "stack30k",
+        
+        "day08",
+]
+
+stack30k = [
+        "stack20k",
+        
+        "day01",
+        "day12",
+]
+
+stack20k = [
+        "stack10k",
+
+        "day05",
+        "day06",
+        "day14",
+        "day15",
+]
+
+stack10k = [
+        "stack4k",
+        
+        "day17",
+]
+
+stack4k = [
+        "stack3k",
+        
+        "day07",
+        "day21",
+]
+
+stack3k = [
+        "stack2k",
+        
+        "day10",
+]
+
+stack2k = [
+        "stack1k",
+        
+        "day04",
+]
+
+stack1k = [
+        "day02",
+        "day03",
+        "day13",
+]
+
+day01 = ["dep:day01"]
+day02 = ["dep:day02"]
+day03 = ["dep:day03"]
+day04 = ["dep:day04"]
+day05 = ["dep:day05"]
+day06 = ["dep:day06"]
+day07 = ["dep:day07"]
+day08 = ["dep:day08"]
+day09 = ["dep:day09"]
+day10 = ["dep:day10"]
+day11 = ["dep:day11"]
+day12 = ["dep:day12"]
+day13 = ["dep:day13"]
+day14 = ["dep:day14"]
+day15 = ["dep:day15"]
+day16 = ["dep:day16"]
+day17 = ["dep:day17"]
+day18 = ["dep:day18"]
+day19 = ["dep:day19"]
+day20 = ["dep:day20"]
+day21 = ["dep:day21"]
+day22 = ["dep:day22"]
+day23 = ["dep:day23"]
+day24 = ["dep:day24"]
+day25 = ["dep:day25"]
+
+[dependencies]
+defmt = "0.3.10"
+heapless = "0.8.0"
+usb-device = { version = "0.3.2" }
+usbd-serial = "0.2.2"
+fugit = "0.3.7"
+
+day01 = { path = "../../day01/rs", default-features = false, optional = true }
+day02 = { path = "../../day02/rs", default-features = false, optional = true }
+day03 = { path = "../../day03/rs", default-features = false, optional = true }
+day04 = { path = "../../day04/rs", default-features = false, optional = true }
+day05 = { path = "../../day05/rs", default-features = false, optional = true }
+day06 = { path = "../../day06/rs", default-features = false, optional = true }
+day07 = { path = "../../day07/rs", default-features = false, optional = true }
+day08 = { path = "../../day08/rs", default-features = false, optional = true }
+day09 = { path = "../../day09/rs", default-features = false, optional = true }
+day10 = { path = "../../day10/rs", default-features = false, optional = true }
+day11 = { path = "../../day11/rs", default-features = false, optional = true }
+day12 = { path = "../../day12/rs", default-features = false, optional = true }
+day13 = { path = "../../day13/rs", default-features = false, optional = true }
+day14 = { path = "../../day14/rs", default-features = false, optional = true }
+day15 = { path = "../../day15/rs", default-features = false, optional = true }
+day16 = { path = "../../day16/rs", default-features = false, optional = true }
+day17 = { path = "../../day17/rs", default-features = false, optional = true }
+day18 = { path = "../../day18/rs", default-features = false, optional = true }
+day19 = { path = "../../day19/rs", default-features = false, optional = true }
+day20 = { path = "../../day20/rs", default-features = false, optional = true }
+day21 = { path = "../../day21/rs", default-features = false, optional = true }
+day22 = { path = "../../day22/rs", default-features = false, optional = true }
+day23 = { path = "../../day23/rs", default-features = false, optional = true }
+day24 = { path = "../../day24/rs", default-features = false, optional = true }
+day25 = { path = "../../day25/rs", default-features = false, optional = true }
+
+[lints.clippy]
+pedantic = "deny"
+large_stack_frames = "deny"
+
+[profile.release]
+debug = true
+codegen-units = 1
