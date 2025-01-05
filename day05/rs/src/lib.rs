@@ -42,7 +42,7 @@ fn reorder(rules: &Rules, pages: &mut [Num]) {
         }
     }
 
-    assert!(is_valid(rules, pages));
+    debug_assert!(is_valid(rules, pages));
 }
 
 fn solve<F>(input: &str, check: F) -> u32

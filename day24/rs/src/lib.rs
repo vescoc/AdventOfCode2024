@@ -233,7 +233,7 @@ pub fn solve_2(input: &str) -> String {
         }
     }
 
-    assert!(bads.len() == 8, "bads invalid");
+    debug_assert!(bads.len() == 8, "bads invalid");
 
     let mut v = bads.iter().map(Bad::output).collect::<Bads<_>>();
     v.sort_unstable();

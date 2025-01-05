@@ -53,7 +53,7 @@ pub fn solve_1(input: &str) -> u64 {
         }
 
         let moveable_size = free_size.min(occupied_size);
-        assert!(moveable_size > 0);
+        debug_assert!(moveable_size > 0);
 
         occupied_size -= moveable_size;
         free_size -= moveable_size;

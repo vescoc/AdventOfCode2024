@@ -266,7 +266,7 @@ pub fn solve_2_bru<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize>(
         let (x, y) = line.split_once(',').unwrap();
         (x.parse::<usize>().unwrap(), y.parse::<usize>().unwrap())
     }) {
-        assert!((x, y) != (0, 0) && (x, y) != (WIDTH - 1, HEIGHT - 1));
+        debug_assert!((x, y) != (0, 0) && (x, y) != (WIDTH - 1, HEIGHT - 1));
 
         if x == 0 || y == HEIGHT - 1 {
             if check(&red, &(x, y)) {

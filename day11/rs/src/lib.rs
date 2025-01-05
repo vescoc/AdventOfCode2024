@@ -11,7 +11,9 @@ pub const INPUT: &str = include_str!("../../input");
 #[cfg(not(feature = "input"))]
 pub const INPUT: &str = &"";
 
-struct Stones(Map<u64, u64>);
+type Stone = u64;
+
+struct Stones(Map<Stone, u64>);
 
 impl Stones {
     const fn new() -> Self {
@@ -22,7 +24,7 @@ impl Stones {
         self.0.clear();
     }
 
-    fn add(&mut self, stone: u64, count: u64) {
+    fn add(&mut self, stone: Stone, count: u64) {
         match self.0.entry(stone) {
             Entry::Vacant(v) => {
                 v.insert(count).unwrap();
@@ -37,12 +39,12 @@ impl Stones {
         self.0.values()
     }
 
-    fn iter(&self) -> impl Iterator<Item = (&u64, &u64)> {
+    fn iter(&self) -> impl Iterator<Item = (&Stone, &u64)> {
         self.0.iter()
     }
 }
 
-fn split_if_even(stone: u64) -> Option<(u64, u64)> {
+fn split_if_even(stone: Stone) -> Option<(Stone, Stone)> {
     stone.checked_ilog10().and_then(|digits| {
         if digits % 2 == 1 {
             let div = 10_u64.pow((digits + 1) / 2);
@@ -64,7 +66,7 @@ fn solve(input: &str, mut blinks: usize) -> u64 {
 
     for (k, v) in input
         .split_whitespace()
-        .map(|stone| (stone.parse::<u64>().unwrap(), 1))
+        .map(|stone| (stone.parse::<Stone>().unwrap(), 1))
     {
         stones[0].add(k, v);
     }
