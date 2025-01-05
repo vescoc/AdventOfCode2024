@@ -38,6 +38,7 @@ impl Iterator for Generator {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> u64 {
     #[cfg(feature = "parallel")]
     let lines = input.par_lines();
@@ -60,6 +61,7 @@ fn key((a, b, c, d): &(i32, i32, i32, i32)) -> usize {
 
 /// # Panics
 #[cfg(feature = "parallel")]
+#[cfg_attr(target_os = "none", inline(never))]
 #[allow(clippy::cast_possible_truncation)]
 pub fn solve_2_par(input: &str) -> u16 {
     use core::sync::atomic::{AtomicU16, Ordering};
@@ -86,6 +88,7 @@ pub fn solve_2_par(input: &str) -> u16 {
 
 /// # Panics
 #[cfg(not(feature = "parallel"))]
+#[cfg_attr(target_os = "none", inline(never))]
 #[allow(clippy::cast_possible_truncation)]
 pub fn solve_2_seq(input: &str) -> u16 {
     let mut map = [0u16; { SIZE }];

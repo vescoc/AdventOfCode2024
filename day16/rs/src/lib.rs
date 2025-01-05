@@ -201,6 +201,7 @@ fn dijkstra_full(
 
 /// # Panics
 #[allow(clippy::cast_possible_truncation)]
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> u32 {
     let maze = input.as_bytes();
     let width = maze.iter().position(|&c| c == b'\n').unwrap();
@@ -234,6 +235,7 @@ pub fn solve_1(input: &str) -> u32 {
 
 /// # Panics
 #[allow(clippy::cast_possible_truncation)]
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> usize {
     let maze = input.as_bytes();
     let width = maze.iter().position(|&c| c == b'\n').unwrap();

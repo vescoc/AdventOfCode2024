@@ -86,6 +86,7 @@ where
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> u32 {
     solve(input, |rules, pages| {
         if is_valid(rules, &pages) {
@@ -97,6 +98,7 @@ pub fn solve_1(input: &str) -> u32 {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> u32 {
     solve(input, |rules, mut pages| {
         if is_valid(rules, &pages) {

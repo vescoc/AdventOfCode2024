@@ -29,6 +29,7 @@ fn id(element: &str) -> usize {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> usize {
     fn set(elements: &[usize]) -> u128 {
         let mut elements = Vec::try_from(elements).unwrap();
@@ -90,6 +91,7 @@ pub fn solve_1(input: &str) -> usize {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> String {
     let mut nodes = NodeSet::new();
     let mut id2node = NodeMap::new();

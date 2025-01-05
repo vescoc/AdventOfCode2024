@@ -294,11 +294,13 @@ fn solve(input: &str, numpad: &PadNum) -> u64 {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> u64 {
     solve(input, &NUM02)
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> u64 {
     solve(input, &NUM25)
 }

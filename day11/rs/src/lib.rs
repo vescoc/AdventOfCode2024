@@ -100,11 +100,13 @@ fn solve(input: &str, mut blinks: usize) -> u64 {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> u64 {
     solve(input, 25)
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> u64 {
     solve(input, 75)
 }

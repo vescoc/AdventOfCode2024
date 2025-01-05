@@ -271,6 +271,7 @@ fn large_push_up_down_bfs<const DIRECTION: isize>(
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> usize {
     solve::<b'O'>(
         input,
@@ -281,6 +282,7 @@ pub fn solve_1(input: &str) -> usize {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2_rec(input: &str) -> usize {
     solve::<b'['>(
         input,
@@ -303,6 +305,7 @@ pub fn solve_2_rec(input: &str) -> usize {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2_bfs(input: &str) -> usize {
     solve::<b'['>(
         input,
@@ -324,6 +327,10 @@ pub fn solve_2_bfs(input: &str) -> usize {
     )
 }
 
+// #[cfg(target_os = "none")]
+// pub use solve_2_bfs as solve_2;
+
+// #[cfg(not(target_os = "none"))]
 pub use solve_2_rec as solve_2;
 
 /// # Panics

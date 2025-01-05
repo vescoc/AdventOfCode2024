@@ -88,6 +88,7 @@ fn run_to_out(pc: &mut usize, register: &mut [Integer], istructions: &[u8]) -> O
 
 /// # Panics
 #[allow(clippy::cast_possible_truncation)]
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> String {
     let mut parts = input.split("\n\n");
 
@@ -128,6 +129,7 @@ pub fn solve_1(input: &str) -> String {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> Integer {
     let mut parts = input.split("\n\n").skip(1);
 

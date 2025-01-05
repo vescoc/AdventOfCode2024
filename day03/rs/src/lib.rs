@@ -57,6 +57,7 @@ fn parse_gated_mul(i: &[u8]) -> IResult<&[u8], Either<bool, u32>> {
     ))(i)
 }
 
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1_nom(input: &str) -> u32 {
     let mut input = input.as_bytes();
 
@@ -83,6 +84,7 @@ pub fn solve_1_nom(input: &str) -> u32 {
     acc
 }
 
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2_nom(input: &str) -> u32 {
     let mut input = input.as_bytes();
 
@@ -168,6 +170,7 @@ fn parse_b(input: &[u8], mut i: usize) -> Result<(usize, u32), usize> {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1_handmade(input: &str) -> u32 {
     let input = input.as_bytes();
 
@@ -205,6 +208,7 @@ pub fn solve_1_handmade(input: &str) -> u32 {
 pub use solve_1_handmade as solve_1;
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2_handmade(input: &str) -> u32 {
     let input = input.as_bytes();
 

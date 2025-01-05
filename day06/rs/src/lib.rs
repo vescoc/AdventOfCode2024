@@ -16,6 +16,7 @@ pub const INPUT: &str = include_str!("../../input");
 pub const INPUT: &str = "";
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> usize {
     let map = input.as_bytes();
     let width = map.iter().position(|&c| c == b'\n').unwrap();
@@ -108,6 +109,7 @@ where
 /// # Panics
 #[cfg(feature = "parallel")]
 #[allow(clippy::large_stack_frames)]
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2_par(input: &str) -> usize {
     let map = input.as_bytes();
     let width = map.iter().position(|&c| c == b'\n').unwrap();
@@ -189,6 +191,7 @@ pub fn solve_2_par(input: &str) -> usize {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2_sync(input: &str) -> usize {
     let map = input.as_bytes();
     let width = map.iter().position(|&c| c == b'\n').unwrap();

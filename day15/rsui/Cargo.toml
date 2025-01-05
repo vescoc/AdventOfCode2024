@@ -3,16 +3,9 @@ name = "day15ui"
 version = "0.1.0"
 edition = "2021"
 
-[package.metadata.aoc]
-year = 2024
-day = 15
-
 [dependencies]
 day15 = { path = "../rs", default-features = false }
 ui = { path = "../../common/rs/ui", features = ["wasm-bindgen"]}
-
-[build-dependencies]
-aoc = { path = "../../common/rs/aoc" }
 
 [dependencies.yew]
 version = "0.21"

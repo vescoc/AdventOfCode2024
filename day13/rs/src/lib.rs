@@ -146,12 +146,14 @@ where
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> i32 {
     solve::<Machine0, _>(input)
 }
 
 /// # Panics
 #[allow(clippy::unreadable_literal)]
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> i64 {
     solve::<Machine1BB, _>(input)
 }

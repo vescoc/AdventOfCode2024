@@ -46,6 +46,7 @@ impl<K, T> core::ops::Deref for CountHashMap<K, T> {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> u32 {
     let mut line1 = Vec::new();
     let mut line2 = Vec::new();
@@ -75,6 +76,7 @@ pub fn solve_1(input: &str) -> u32 {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> u32 {
     let mut line1 = Vec::new();
     let mut line2 = CountHashMap::new();

@@ -187,7 +187,6 @@ dependencies = [
 name = "day15ui"
 version = "0.1.0"
 dependencies = [
- "aoc",
  "day15",
  "ui",
  "yew",

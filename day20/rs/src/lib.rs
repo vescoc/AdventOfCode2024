@@ -223,11 +223,13 @@ pub fn solve_m<const MIN_SAVING: usize, const CHEAT_LEN: usize>(input: &str) -> 
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> usize {
     solve_m::<100, 2>(input)
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> usize {
     solve_v::<100, 20>(input)
 }

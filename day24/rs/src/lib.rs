@@ -93,6 +93,7 @@ fn parse_logic<'a>(input: &'a str, instructions: &mut Instructions<'a>, z: &mut 
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> u64 {
     fn get_z(z: &[&str], values: &Values<&str, bool>) -> Option<u64> {
         z.iter().enumerate().try_fold(0, |acc, (bit, z)| {
@@ -131,6 +132,7 @@ pub fn solve_1(input: &str) -> u64 {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> String {
     #[allow(dead_code)]
     #[derive(Debug)]

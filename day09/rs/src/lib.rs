@@ -16,6 +16,7 @@ pub const INPUT: &str = "";
 
 /// # Panics
 #[allow(clippy::cast_possible_truncation)]
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> u64 {
     let mut occupied = Disk::new();
     let mut free = Free::new();
@@ -81,6 +82,7 @@ pub fn solve_1(input: &str) -> u64 {
 
 /// # Panics
 #[allow(clippy::too_many_lines, clippy::cast_possible_truncation)]
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> u64 {
     #[derive(Debug)]
     struct Info {

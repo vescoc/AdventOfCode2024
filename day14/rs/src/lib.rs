@@ -56,6 +56,7 @@ pub fn robots(input: &str) -> impl Iterator<Item = Robot> + use<'_> {
 
 /// # Panics
 #[allow(clippy::cast_sign_loss)]
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1<const WIDTH: i32, const HEIGHT: i32>(input: &str) -> usize {
     robots(input)
         .fold(
@@ -83,6 +84,7 @@ pub fn solve_1<const WIDTH: i32, const HEIGHT: i32>(input: &str) -> usize {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> usize {
     const TARGET: &[u8] = b"**********";
 

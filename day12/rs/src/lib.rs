@@ -67,6 +67,7 @@ where
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> usize {
     solve::<usize, _, _>(
         input,
@@ -77,6 +78,7 @@ pub fn solve_1(input: &str) -> usize {
 
 /// # Panics
 #[allow(clippy::cast_possible_wrap)]
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> usize {
     fn key(g: (isize, isize)) -> usize {
         match g {

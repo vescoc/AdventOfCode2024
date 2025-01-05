@@ -307,10 +307,12 @@ pub fn solve_2_bru<const WIDTH: usize, const HEIGHT: usize, const SIZE: usize>(
     unreachable!()
 }
 
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> usize {
     solve_1_bfs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, 1024, BITSET_SIZE>(input)
 }
 
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> String {
     solve_2_bs::<PUZZLE_WIDTH, PUZZLE_HEIGHT, BITSET_SIZE, 1024>(
         input,

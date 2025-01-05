@@ -51,6 +51,7 @@ trait SafeReport: Iterator<Item = u32> + Sized {
 impl<I: Iterator<Item = u32>> SafeReport for I {}
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> usize {
     #[cfg(feature = "parallel")]
     let lines = input.par_lines();
@@ -68,6 +69,7 @@ pub fn solve_1(input: &str) -> usize {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> usize {
     #[cfg(feature = "parallel")]
     let lines = input.par_lines();

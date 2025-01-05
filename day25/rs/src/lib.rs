@@ -20,6 +20,7 @@ type Vec<T> = HLVec<T, 1024>;
 type String = HLString<1>;
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> usize {
     let (mut keys, mut locks) = const { (Vec::new(), Vec::new()) };
     for part in input.split("\n\n") {
@@ -54,8 +55,9 @@ pub fn solve_1(input: &str) -> usize {
         .sum()
 }
 
-#[cfg(feature = "simd")]
 /// # Panics
+#[cfg(feature = "simd")]
+#[cfg_attr(target_os = "none", inline(never))]
 #[allow(
     clippy::cast_possible_truncation,
     clippy::cast_possible_wrap,
@@ -130,6 +132,7 @@ where
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(_input: &str) -> String {
     let mut result = String::new();
     result.push('*').unwrap();

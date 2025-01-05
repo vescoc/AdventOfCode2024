@@ -100,11 +100,13 @@ fn solve<P: Part>(input: &str) -> u64 {
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> u64 {
     solve::<Part1>(input)
 }
 
 /// # Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> u64 {
     solve::<Part2>(input)
 }

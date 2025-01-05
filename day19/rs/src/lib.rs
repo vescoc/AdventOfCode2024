@@ -17,10 +17,12 @@ pub const INPUT: &str = include_str!("../../input");
 pub const INPUT: &str = "";
 
 /// Panics
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_1(input: &str) -> usize {
     solve_1_r(input)
 }
 
+#[cfg_attr(target_os = "none", inline(never))]
 pub fn solve_2(input: &str) -> u64 {
     solve_2_r(input)
 }
