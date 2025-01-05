@@ -47,12 +47,13 @@ name = "aoc2024-rp-pico2"
 version = "0.1.0"
 dependencies = [
  "cortex-m",
- "cortex-m-rt",
  "defmt",
  "defmt-rtt",
  "embedded-aoc",
+ "embedded-io",
  "rp235x-hal",
  "usb-device",
+ "usbd-serial",
 ]
 
 [[package]]
@@ -548,10 +549,9 @@ dependencies = [
  "day24",
  "day25",
  "defmt",
+ "embedded-io",
  "fugit",
  "heapless",
- "usb-device",
- "usbd-serial",
 ]
 
 [[package]]

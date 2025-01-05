@@ -3,9 +3,12 @@
 
 use defmt_rtt as _;
 
+use embedded_io::{ErrorType, Read, Write};
+
 use rp2040_hal as hal;
 
-use usb_device::class_prelude::*;
+use usb_device::{class_prelude::*, prelude::*};
+use usbd_serial::SerialPort;
 
 #[unsafe(link_section = ".boot2")]
 #[used]
@@ -21,6 +24,33 @@ impl embedded_aoc::Timer<u64, 1, 1_000_000> for Now {
     }
 }
 
+struct SerialWrapper<'a, B: UsbBus> {
+    usb_device: UsbDevice<'a, B>,
+    serial_port: SerialPort<'a, B>,
+}
+
+impl<'a, B: UsbBus> ErrorType for SerialWrapper<'a, B> {
+    type Error = <SerialPort<'a, B> as ErrorType>::Error;
+}
+
+impl<B: UsbBus> Write for SerialWrapper<'_, B> {
+    fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
+        Ok(self.serial_port.write(buf)?)
+    }
+
+    fn flush(&mut self) -> Result<(), Self::Error> {
+        Ok(self.serial_port.flush()?)
+    }
+}
+
+impl<B: UsbBus> Read for SerialWrapper<'_, B> {
+    fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+        while !self.usb_device.poll(&mut [&mut self.serial_port]) {}
+
+        Ok(self.serial_port.read(buf)?)
+    }
+}
+
 #[panic_handler]
 fn core_panic(info: &core::panic::PanicInfo) -> ! {
     defmt::error!("PANIC: {}", info);
@@ -32,6 +62,11 @@ fn core_panic(info: &core::panic::PanicInfo) -> ! {
 
 #[hal::entry]
 fn main() -> ! {
+    extern "C" {
+        static _stack_end: u32;
+        static _stack_start: u32;
+    }
+    
     let mut pac = hal::pac::Peripherals::take().unwrap();
 
     let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
@@ -46,10 +81,15 @@ fn main() -> ! {
         &mut watchdog,
     )
     .unwrap();
-    
-    let timer = hal::Timer::new(pac.TIMER, &mut pac.RESETS, &clocks);
 
-    defmt::info!("AoC 2024 USB");
+    defmt::info!("RP-PICO USB AoC 2024");
+
+    let stack_low = &raw const _stack_end as u32;
+    let stack_high = &raw const _stack_start as u32;
+
+    defmt::info!("stack: [{} - {}]: {} bytes", stack_low, stack_high, stack_high - stack_low);
+    
+    let timer = Now(hal::Timer::new(pac.TIMER, &mut pac.RESETS, &clocks));
 
     let usb_bus = UsbBusAllocator::new(hal::usb::UsbBus::new(
         pac.USBCTRL_REGS,
@@ -59,9 +99,23 @@ fn main() -> ! {
         &mut pac.RESETS,
     ));
 
-    let now = Now(timer);
+    let serial_port = SerialPort::new(&usb_bus);
 
-    embedded_aoc::usb(&now, &usb_bus);
+    let usb_device = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x16c0, 0x27dd))
+        .strings(&[StringDescriptors::default()
+            .manufacturer("Vescoc Company")
+            .product("Serial port")
+            .serial_number("TEST")])
+        .unwrap()
+        .device_class(usbd_serial::USB_CLASS_CDC)
+        .build();
+
+    let mut serial = SerialWrapper {
+        usb_device,
+        serial_port,
+    };
+
+    embedded_aoc::run(&mut serial, &timer);
 }
 
 #[unsafe(link_section = ".bi_entries")]

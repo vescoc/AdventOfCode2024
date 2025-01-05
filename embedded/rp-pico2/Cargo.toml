@@ -7,12 +7,13 @@ homepage = "urn:private"
 
 [dependencies]
 cortex-m = "0.7.7"
-cortex-m-rt = "0.7.5"
 defmt = "0.3.10"
 defmt-rtt = "0.4.1"
 rp235x-hal = { version = "0.2.0", features = ["binary-info", "rt", "defmt", "critical-section-impl"] }
 usb-device = { version = "0.3.2" }
-embedded-aoc = { path = "../embedded-aoc", features = ["stack400k"] }
+usbd-serial = "0.2.2"
+embedded-aoc = { path = "../embedded-aoc", default-features = false, features = ["stack400k", "defmt"] }
+embedded-io = "0.6.1"
 
 [lints.clippy]
 pedantic = "deny"
@@ -21,3 +22,6 @@ large_stack_frames = "deny"
 [profile.release]
 debug = true
 codegen-units = 1
+# incremental = false
+lto = 'fat'
+# opt-level = 's'

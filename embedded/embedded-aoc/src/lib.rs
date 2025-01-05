@@ -1,14 +1,21 @@
 #![no_std]
 
-use core::fmt::{self, Write};
+use core::fmt::Write as _;
+
+use core::fmt;
 use core::ops;
 
-use fugit::{Instant, Duration};
+use embedded_io::{Read, Write};
+
+use fugit::{Duration, Instant};
 
 use heapless::{String as HLString, Vec as HLVec};
 
-use usb_device::{class_prelude::*, prelude::*};
-use usbd_serial::SerialPort;
+#[cfg(feature = "defmt")]
+use defmt::{info, warn};
+
+#[cfg(feature = "log")]
+use log::{info, warn};
 
 type Vec<T> = HLVec<T, { 1024 * 32 }>;
 type String = HLString<1024>;
@@ -17,7 +24,7 @@ type PartResult = HLString<64>;
 const START_INPUT_TAG: &str = "START INPUT DAY: ";
 const END_INPUT_TAG: &str = "END INPUT";
 
-#[derive(defmt::Format)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 enum Day {
     #[cfg(feature = "day01")]
     Day01,
@@ -105,7 +112,10 @@ impl Day {
             #[cfg(feature = "day13")]
             Day::Day13 => Self::to_string(result, day13::solve_1(input)),
             #[cfg(feature = "day14")]
-            Day::Day14 => Self::to_string(result, day14::solve_1::<{ day14::WIDTH }, { day14::HEIGHT }>(input)),
+            Day::Day14 => Self::to_string(
+                result,
+                day14::solve_1::<{ day14::WIDTH }, { day14::HEIGHT }>(input),
+            ),
             #[cfg(feature = "day15")]
             Day::Day15 => Self::to_string(result, day15::solve_1(input)),
             #[cfg(feature = "day16")]
@@ -191,13 +201,10 @@ impl core::str::FromStr for Day {
     type Err = &'static str;
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
-        match input.chars().take(2).try_fold(0, |acc, digit| {
-            match digit {
-                '0'..='9' => Some(acc * 10 + digit as u32 - '0' as u32),
-                _ => None,                    
-            }
-        })
-        {
+        match input.chars().take(2).try_fold(0, |acc, digit| match digit {
+            '0'..='9' => Some(acc * 10 + digit as u32 - '0' as u32),
+            _ => None,
+        }) {
             #[cfg(feature = "day01")]
             Some(1) => Ok(Day::Day01),
             #[cfg(feature = "day02")]
@@ -318,117 +325,113 @@ pub trait Timer<T, const NOM: u32, const DENOM: u32> {
 }
 
 /// # Panics
-#[allow(clippy::too_many_lines)]
-pub fn usb<B: UsbBus, const NOM: u32, const DENOM: u32>(timer: &impl Timer<u64, NOM, DENOM>, usb_bus: &UsbBusAllocator<B>) -> !
+pub fn run<S, const NOM: u32, const DENOM: u32>(
+    mut serial: S,
+    timer: &impl Timer<u64, NOM, DENOM>,
+) -> !
 where
+    S: Write + Read,
     Instant<u64, NOM, DENOM>: ops::Sub<Output = Duration<u64, NOM, DENOM>>,
 {
-    let mut serial = SerialPort::new(usb_bus);
-
-    let mut usb_device = UsbDeviceBuilder::new(usb_bus, UsbVidPid(0x16c0, 0x27dd))
-        .strings(&[StringDescriptors::default()
-            .manufacturer("Vescoc Company")
-            .product("Serial port")
-            .serial_number("TEST")])
-        .unwrap()
-        .device_class(usbd_serial::USB_CLASS_CDC)
-        .build();
-
     let mut buffer = Vec::new();
     loop {
         buffer.clear();
         loop {
-            if usb_device.poll(&mut [&mut serial]) {
-                let mut buf = [0u8; 1024];
-                match serial.read(&mut buf) {
-                    Err(_) | Ok(0) => {}
-                    Ok(count) => {
-                        if buffer.extend_from_slice(&buf[..count]).is_err() {
-                            defmt::warn!("buffer overflow");
-                            break;
-                        }
+            let mut buf = [0u8; 64];
+            match serial.read(&mut buf) {
+                Err(_) | Ok(0) => {}
+                Ok(count) => {
+                    if buffer.extend_from_slice(&buf[..count]).is_err() {
+                        warn!("buffer overflow");
+                        break;
+                    }
 
-                        if let Ok(input) = core::str::from_utf8(&buffer) {
-                            match (input.find(START_INPUT_TAG), input.find(END_INPUT_TAG)) {
-                                (Some(start_position), Some(end_position)) => {
-                                    let mut result = String::new();
-                                    
-                                    let Ok(day) = input[start_position + START_INPUT_TAG.len()..]
-                                        .parse::<Day>()
-                                    else {
-                                        defmt::warn!("unsupported day");
-                                        
-                                        result.clear();
-                                        write!(&mut result, "unsupported day\r\n").unwrap();
+                    if let Ok(input) = core::str::from_utf8(&buffer) {
+                        let mut result = String::new();
 
-                                        send_response(&mut usb_device, &mut serial, result.as_str().as_bytes());
-                                        
-                                        break;
-                                    };
+                        match (input.find(START_INPUT_TAG), input.find(END_INPUT_TAG)) {
+                            (Some(start_position), Some(end_position)) => {
+                                let Ok(day) =
+                                    input[start_position + START_INPUT_TAG.len()..].parse::<Day>()
+                                else {
+                                    warn!("unsupported day");
 
-                                    let input = input
-                                        [start_position + START_INPUT_TAG.len() + 2..end_position]
-                                        .trim();
+                                    result.clear();
+                                    write!(&mut result, "unsupported day\r\n").unwrap();
 
-                                    defmt::info!("[{}] start working on {}", day, day);
-
-                                    let mut part_1 = PartResult::new();
-                                    let mut part_2 = PartResult::new();
-
-                                    let start = timer.now();
-
-                                    if day.solve_1(&mut part_1, input).is_err() {
-                                        defmt::warn!("part_1: buffer overflow");
-                                        break;
-                                    }
-
-                                    if day.solve_2(&mut part_2, input).is_err() {
-                                        defmt::warn!("part_2: buffer overflow");
-                                        break;
-                                    }
-
-                                    let elapsed = timer.now() - start;
-
-                                    {
-                                        result.clear();
-                                        write!(&mut result, "[{day}] part 1: {part_1}").unwrap();
-                                        defmt::info!("{}", result.as_str());
-                                    }
-                                    {
-                                        result.clear();
-                                        write!(&mut result, "[{day}] part 2: {part_2}").unwrap();
-                                        defmt::info!("{}", result.as_str());
-                                    }
-                                    {
-                                        result.clear();
-                                        write!(
-                                            &mut result,
-                                            "[{day}] elapsed: {}ms ({}us)",
-                                            elapsed.to_millis(),
-                                            elapsed.to_micros()
-                                        )
-                                        .unwrap();
-                                        defmt::info!("{}", result.as_str());
-                                    }
-
-                                    {
-                                        result.clear();
-                                        write!(&mut result, "[{day}] day {day}\r\n[{day}] part 1: {part_1}\r\n[{day}] part 2: {part_2}\r\n[{day}] elapsed: {}ms ({}us)\r\n", elapsed.to_millis(), elapsed.to_micros()).unwrap();
-                                        send_response(&mut usb_device, &mut serial, result.as_str().as_bytes());
-                                    }
+                                    response(&mut serial, result.as_str().as_bytes());
 
                                     break;
-                                }
-                                (None, Some(_)) => {
-                                    defmt::warn!("input invalid");
+                                };
+
+                                let input = input
+                                    [start_position + START_INPUT_TAG.len() + 2..end_position]
+                                    .trim();
+
+                                info!("[{}] start working on {}", day, day);
+
+                                let mut part_1 = PartResult::new();
+                                let mut part_2 = PartResult::new();
+
+                                let start = timer.now();
+
+                                if day.solve_1(&mut part_1, input).is_err() {
+                                    warn!("part_1: buffer overflow");
                                     break;
                                 }
-                                _ => {}
+
+                                if day.solve_2(&mut part_2, input).is_err() {
+                                    warn!("part_2: buffer overflow");
+                                    break;
+                                }
+
+                                let elapsed = timer.now() - start;
+
+                                {
+                                    result.clear();
+                                    write!(&mut result, "[{day}] part 1: {part_1}").unwrap();
+                                    info!("{}", result.as_str());
+                                }
+                                {
+                                    result.clear();
+                                    write!(&mut result, "[{day}] part 2: {part_2}").unwrap();
+                                    info!("{}", result.as_str());
+                                }
+                                {
+                                    result.clear();
+                                    write!(
+                                        &mut result,
+                                        "[{day}] elapsed: {}ms ({}us)",
+                                        elapsed.to_millis(),
+                                        elapsed.to_micros()
+                                    )
+                                    .unwrap();
+                                    info!("{}", result.as_str());
+                                }
+
+                                {
+                                    result.clear();
+                                    write!(&mut result, "[{day}] day {day}\r\n[{day}] part 1: {part_1}\r\n[{day}] part 2: {part_2}\r\n[{day}] elapsed: {}ms ({}us)\r\n", elapsed.to_millis(), elapsed.to_micros()).unwrap();
+                                    response(&mut serial, result.as_str().as_bytes());
+                                }
+
+                                break;
                             }
-                        } else {
-                            defmt::warn!("invalid utf8 data");
-                            break;
+                            (None, Some(_)) => {
+                                warn!("invalid input");
+                                
+                                result.clear();
+                                write!(&mut result, "invalid input\r\n").unwrap();
+
+                                response(&mut serial, result.as_str().as_bytes());
+
+                                break;
+                            }
+                            _ => {}
                         }
+                    } else {
+                        warn!("invalid utf8 data");
+                        break;
                     }
                 }
             }
@@ -436,35 +439,8 @@ where
     }
 }
 
-fn send_response<B: UsbBus>(usb_device: &mut UsbDevice<B>, serial: &mut SerialPort<B>, mut buf: &[u8]) {
-    let mut max_retry = 0;
-    while !buf.is_empty() {
-        match serial.write(buf) {
-            Ok(len) => buf = &buf[len..],
-            Err(UsbError::WouldBlock) => {
-                if !usb_device.poll(&mut [serial]) {
-                    defmt::warn!(
-                        "would block: poll returned false"
-                    );
-                    break;
-                }
-
-                max_retry += 1;
-                if max_retry > 3 {
-                    defmt::warn!("would block: max retry");
-                    break;
-                }
-            }
-            Err(_) => {
-                defmt::warn!(
-                    "received an error while sending result"
-                );
-                break;
-            }
-        }
-    }
-
-    if serial.flush().is_err() {
-        defmt::trace!("cannot flush");
+fn response(write: &mut impl Write, buf: &[u8]) {
+    if write.write_all(buf).and_then(|()| write.flush()).is_err() {
+        warn!("cannot write / flush response");
     }
 }

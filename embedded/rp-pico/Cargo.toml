@@ -13,7 +13,9 @@ defmt-rtt = "0.4.1"
 rp2040-boot2 = "0.3.0"
 rp2040-hal = { version = "0.11.0", features = ["binary-info", "rt", "defmt", "critical-section-impl"] }
 usb-device = { version = "0.3.2" }
-embedded-aoc = { path = "../embedded-aoc", features = ["stack150k"] }
+usbd-serial = "0.2.2"
+embedded-aoc = { path = "../embedded-aoc", default-features = false, features = ["stack150k", "defmt"] }
+embedded-io = "0.6.1"
 
 [lints.clippy]
 pedantic = "deny"
@@ -22,3 +24,6 @@ large_stack_frames = "deny"
 [profile.release]
 debug = true
 codegen-units = 1
+# incremental = false
+lto = 'fat'
+# opt-level = 's'

@@ -51,9 +51,11 @@ dependencies = [
  "defmt",
  "defmt-rtt",
  "embedded-aoc",
+ "embedded-io",
  "rp2040-boot2",
  "rp2040-hal",
  "usb-device",
+ "usbd-serial",
 ]
 
 [[package]]
@@ -526,10 +528,9 @@ dependencies = [
  "day24",
  "day25",
  "defmt",
+ "embedded-io",
  "fugit",
  "heapless",
- "usb-device",
- "usbd-serial",
 ]
 
 [[package]]

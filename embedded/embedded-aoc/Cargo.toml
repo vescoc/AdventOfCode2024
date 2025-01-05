@@ -6,7 +6,10 @@ authors = ["vescoc"]
 homepage = "urn:private"
 
 [features]
-default = ["stack1k"]
+default = ["stack1k", "defmt"]
+
+defmt = ["dep:defmt"]
+log = ["dep:log"]
 
 stack400k = [
         "stack350k",
@@ -138,11 +141,11 @@ day24 = ["dep:day24"]
 day25 = ["dep:day25"]
 
 [dependencies]
-defmt = "0.3.10"
+defmt = { version = "0.3.10", optional = true }
+log = { version = "0.4.22", optional = true }
 heapless = "0.8.0"
-usb-device = { version = "0.3.2" }
-usbd-serial = "0.2.2"
 fugit = "0.3.7"
+embedded-io = "0.6.1"
 
 day01 = { path = "../../day01/rs", default-features = false, optional = true }
 day02 = { path = "../../day02/rs", default-features = false, optional = true }
