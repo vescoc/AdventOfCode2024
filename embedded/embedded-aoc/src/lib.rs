@@ -24,7 +24,8 @@ const START_INPUT_TAG: &str = "START INPUT DAY: ";
 const END_INPUT_TAG: &str = "END INPUT";
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
-enum Day {
+#[derive(Copy, Clone)]
+pub enum Day {
     #[cfg(feature = "day01")]
     Day01,
     #[cfg(feature = "day02")]
@@ -82,7 +83,7 @@ impl Day {
         write!(result, "{value}")
     }
 
-    fn solve_1(&self, result: &mut PartResult, input: &str) -> Result<(), fmt::Error> {
+    fn solve_1(self, result: &mut PartResult, input: &str) -> Result<(), fmt::Error> {
         match self {
             #[cfg(feature = "day01")]
             Day::Day01 => Self::to_string(result, day01::solve_1(input)),
@@ -140,7 +141,7 @@ impl Day {
         }
     }
 
-    fn solve_2(&self, result: &mut PartResult, input: &str) -> Result<(), fmt::Error> {
+    fn solve_2(self, result: &mut PartResult, input: &str) -> Result<(), fmt::Error> {
         match self {
             #[cfg(feature = "day01")]
             Day::Day01 => Self::to_string(result, day01::solve_2(input)),
@@ -323,10 +324,32 @@ pub trait Timer<T, const NOM: u32, const DENOM: u32> {
     fn now(&self) -> Instant<T, NOM, DENOM>;
 }
 
+pub trait Handler<T, const NOM: u32, const DENOM: u32> {
+    fn started(&mut self, _day: Day, _timestamp: Instant<T, NOM, DENOM>) {}
+    fn ended(
+        &mut self,
+        _day: Day,
+        _elapsed: Duration<T, NOM, DENOM>,
+        _part_1: &str,
+        _part_2: &str,
+    ) {
+    }
+    fn unsupported_day(&mut self) {}
+    fn invalid_input(&mut self) {}
+}
+
+#[derive(Default)]
+pub struct DummyHandler<T, const NOM: u32, const DENOM: u32> {
+    _t: core::marker::PhantomData<T>,
+}
+
+impl<T, const NOM: u32, const DENOM: u32> Handler<T, NOM, DENOM> for DummyHandler<T, NOM, DENOM> {}
+
 /// # Panics
 pub fn run<const NOM: u32, const DENOM: u32>(
     (mut rx, mut tx): (impl Read, impl Write),
     timer: &impl Timer<u64, NOM, DENOM>,
+    mut handler: impl Handler<u64, NOM, DENOM>,
 ) -> !
 where
     Instant<u64, NOM, DENOM>: ops::Sub<Output = Duration<u64, NOM, DENOM>>,
@@ -352,6 +375,8 @@ where
                                 else {
                                     warn!("unsupported day");
 
+                                    handler.unsupported_day();
+
                                     write!(&mut tx, "unsupported day\r\n").unwrap();
 
                                     break;
@@ -368,6 +393,8 @@ where
 
                                 let start = timer.now();
 
+                                handler.started(day, start);
+
                                 if day.solve_1(&mut part_1, input).is_err() {
                                     warn!("part_1: buffer overflow");
                                     break;
@@ -379,17 +406,20 @@ where
                                 }
 
                                 let elapsed = timer.now() - start;
-                                
+
+                                handler.ended(day, elapsed, part_1.as_str(), part_2.as_str());
+
                                 info!("[{}] part 1: {}", day, part_1.as_str());
                                 write!(&mut tx, "[{day}] part 1: {part_1}\r\n").unwrap();
-                                
+
                                 info!("[{}] part 2: {}", day, part_2.as_str());
                                 write!(&mut tx, "[{day}] part 2: {part_2}\r\n").unwrap();
 
-                                info!("[{}] elapsed: {}ms ({}us)",
-                                      day,
-                                      elapsed.to_millis(),
-                                      elapsed.to_micros()
+                                info!(
+                                    "[{}] elapsed: {}ms ({}us)",
+                                    day,
+                                    elapsed.to_millis(),
+                                    elapsed.to_micros()
                                 );
                                 write!(
                                     &mut tx,
@@ -397,13 +427,17 @@ where
                                     elapsed.to_millis(),
                                     elapsed.to_micros()
                                 )
-                                    .unwrap();
-                                
+                                .unwrap();
+
                                 break;
                             }
                             (None, Some(_)) => {
                                 warn!("invalid input");
+
+                                handler.invalid_input();
+
                                 write!(&mut tx, "invalid input\r\n").unwrap();
+
                                 break;
                             }
                             _ => {}

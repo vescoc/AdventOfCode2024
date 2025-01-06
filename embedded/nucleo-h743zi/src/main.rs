@@ -11,6 +11,7 @@ use cortex_m::interrupt::Mutex;
 
 use stm32h7xx_hal as hal;
 
+use hal::gpio::{Output, Pin};
 use hal::pac;
 use hal::prelude::*;
 use hal::rcc::rec::UsbClkSel;
@@ -19,7 +20,7 @@ use hal::usb_hs::{UsbBus, USB2};
 
 use pac::interrupt;
 
-use fugit::Instant;
+use fugit::{Duration, Instant};
 
 use usb_device::prelude::*;
 
@@ -49,6 +50,47 @@ static mut EP_MEMORY: MaybeUninit<[u32; 1024]> = MaybeUninit::uninit();
 
 static OVERFLOWS: AtomicU32 = AtomicU32::new(0);
 static TIMER: Mutex<RefCell<Option<timer::Timer<pac::TIM2>>>> = Mutex::new(RefCell::new(None));
+
+struct SimpleHandler<
+    const P1: char,
+    const N1: u8,
+    const P2: char,
+    const N2: u8,
+    const P3: char,
+    const N3: u8,
+> {
+    led1: Pin<P1, N1, Output>,
+    led2: Pin<P2, N2, Output>,
+    led3: Pin<P3, N3, Output>,
+}
+
+impl<const P1: char, const N1: u8, const P2: char, const N2: u8, const P3: char, const N3: u8>
+    embedded_aoc::Handler<u64, 1, 1_000_000> for SimpleHandler<P1, N1, P2, N2, P3, N3>
+{
+    fn started(&mut self, _: embedded_aoc::Day, _: Instant<u64, 1, 1_000_000>) {
+        self.led1.set_high();
+        self.led2.set_low();
+        self.led3.set_low();
+    }
+
+    fn ended(&mut self, _: embedded_aoc::Day, _: Duration<u64, 1, 1_000_000>, _: &str, _: &str) {
+        self.led1.set_low();
+        self.led2.set_low();
+        self.led3.set_low();
+    }
+
+    fn unsupported_day(&mut self) {
+        self.led1.set_low();
+        self.led2.set_low();
+        self.led3.set_high();
+    }
+
+    fn invalid_input(&mut self) {
+        self.led1.set_low();
+        self.led2.set_high();
+        self.led3.set_low();
+    }
+}
 
 #[cortex_m_rt::entry]
 #[allow(clippy::similar_names)]
@@ -84,7 +126,7 @@ fn main() -> ! {
     let mut led2 = gpiob.pb7.into_push_pull_output();
     let mut led3 = gpiob.pb14.into_push_pull_output();
 
-    led1.set_high();
+    led1.set_low();
     led2.set_low();
     led3.set_low();
 
@@ -144,7 +186,9 @@ fn main() -> ! {
 
     let timer = Now;
 
-    embedded_aoc::run((rx, tx), &timer);
+    let handler = SimpleHandler { led1, led2, led3 };
+
+    embedded_aoc::run((rx, tx), &timer, handler);
 }
 
 fn timestamp() -> u64 {

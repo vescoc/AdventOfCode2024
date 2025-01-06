@@ -85,7 +85,7 @@ fn main() -> ! {
     
     let (rx, tx) = serial.split();
 
-    embedded_aoc::run((rx, tx), &timer);
+    embedded_aoc::run((rx, tx), &timer, embedded_aoc::DummyHandler::default());
 }
 
 #[unsafe(link_section = ".bi_entries")]

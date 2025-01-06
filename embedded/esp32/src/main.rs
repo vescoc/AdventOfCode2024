@@ -47,5 +47,5 @@ fn main() -> ! {
 
     let timer = Now;
 
-    embedded_aoc::run((rx, tx), &timer);
+    embedded_aoc::run((rx, tx), &timer, embedded_aoc::DummyHandler::default());
 }
