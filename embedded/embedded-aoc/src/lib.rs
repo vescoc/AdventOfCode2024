@@ -18,7 +18,6 @@ use defmt::{info, warn};
 use log::{info, warn};
 
 type Vec<T> = HLVec<T, { 1024 * 32 }>;
-type String = HLString<1024>;
 type PartResult = HLString<64>;
 
 const START_INPUT_TAG: &str = "START INPUT DAY: ";
@@ -325,20 +324,19 @@ pub trait Timer<T, const NOM: u32, const DENOM: u32> {
 }
 
 /// # Panics
-pub fn run<S, const NOM: u32, const DENOM: u32>(
-    mut serial: S,
+pub fn run<const NOM: u32, const DENOM: u32>(
+    (mut rx, mut tx): (impl Read, impl Write),
     timer: &impl Timer<u64, NOM, DENOM>,
 ) -> !
 where
-    S: Write + Read,
     Instant<u64, NOM, DENOM>: ops::Sub<Output = Duration<u64, NOM, DENOM>>,
 {
+    let mut buf = [0u8; 64];
     let mut buffer = Vec::new();
     loop {
         buffer.clear();
         loop {
-            let mut buf = [0u8; 64];
-            match serial.read(&mut buf) {
+            match rx.read(&mut buf) {
                 Err(_) | Ok(0) => {}
                 Ok(count) => {
                     if buffer.extend_from_slice(&buf[..count]).is_err() {
@@ -347,8 +345,6 @@ where
                     }
 
                     if let Ok(input) = core::str::from_utf8(&buffer) {
-                        let mut result = String::new();
-
                         match (input.find(START_INPUT_TAG), input.find(END_INPUT_TAG)) {
                             (Some(start_position), Some(end_position)) => {
                                 let Ok(day) =
@@ -356,10 +352,7 @@ where
                                 else {
                                     warn!("unsupported day");
 
-                                    result.clear();
-                                    write!(&mut result, "unsupported day\r\n").unwrap();
-
-                                    response(&mut serial, result.as_str().as_bytes());
+                                    write!(&mut tx, "unsupported day\r\n").unwrap();
 
                                     break;
                                 };
@@ -386,45 +379,31 @@ where
                                 }
 
                                 let elapsed = timer.now() - start;
+                                
+                                info!("[{}] part 1: {}", day, part_1.as_str());
+                                write!(&mut tx, "[{day}] part 1: {part_1}\r\n").unwrap();
+                                
+                                info!("[{}] part 2: {}", day, part_2.as_str());
+                                write!(&mut tx, "[{day}] part 2: {part_2}\r\n").unwrap();
 
-                                {
-                                    result.clear();
-                                    write!(&mut result, "[{day}] part 1: {part_1}").unwrap();
-                                    info!("{}", result.as_str());
-                                }
-                                {
-                                    result.clear();
-                                    write!(&mut result, "[{day}] part 2: {part_2}").unwrap();
-                                    info!("{}", result.as_str());
-                                }
-                                {
-                                    result.clear();
-                                    write!(
-                                        &mut result,
-                                        "[{day}] elapsed: {}ms ({}us)",
-                                        elapsed.to_millis(),
-                                        elapsed.to_micros()
-                                    )
+                                info!("[{}] elapsed: {}ms ({}us)",
+                                      day,
+                                      elapsed.to_millis(),
+                                      elapsed.to_micros()
+                                );
+                                write!(
+                                    &mut tx,
+                                    "[{day}] elapsed: {}ms ({}us)\r\n",
+                                    elapsed.to_millis(),
+                                    elapsed.to_micros()
+                                )
                                     .unwrap();
-                                    info!("{}", result.as_str());
-                                }
-
-                                {
-                                    result.clear();
-                                    write!(&mut result, "[{day}] day {day}\r\n[{day}] part 1: {part_1}\r\n[{day}] part 2: {part_2}\r\n[{day}] elapsed: {}ms ({}us)\r\n", elapsed.to_millis(), elapsed.to_micros()).unwrap();
-                                    response(&mut serial, result.as_str().as_bytes());
-                                }
-
+                                
                                 break;
                             }
                             (None, Some(_)) => {
                                 warn!("invalid input");
-                                
-                                result.clear();
-                                write!(&mut result, "invalid input\r\n").unwrap();
-
-                                response(&mut serial, result.as_str().as_bytes());
-
+                                write!(&mut tx, "invalid input\r\n").unwrap();
                                 break;
                             }
                             _ => {}
@@ -436,11 +415,5 @@ where
                 }
             }
         }
-    }
-}
-
-fn response(write: &mut impl Write, buf: &[u8]) {
-    if write.write_all(buf).and_then(|()| write.flush()).is_err() {
-        warn!("cannot write / flush response");
     }
 }

@@ -50,8 +50,8 @@ dependencies = [
  "defmt",
  "defmt-rtt",
  "embedded-aoc",
- "embedded-io",
  "rp235x-hal",
+ "serial-port-splitter",
  "usb-device",
  "usbd-serial",
 ]
@@ -1794,6 +1794,15 @@ dependencies = [
  "itoa",
  "ryu",
  "serde",
+]
+
+[[package]]
+name = "serial-port-splitter"
+version = "0.1.0"
+dependencies = [
+ "embedded-io",
+ "usb-device",
+ "usbd-serial",
 ]
 
 [[package]]

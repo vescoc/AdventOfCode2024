@@ -3,8 +3,6 @@
 
 use defmt_rtt as _;
 
-use embedded_io::{ErrorType, Read, Write};
-
 use rp2040_hal as hal;
 
 use usb_device::{class_prelude::*, prelude::*};
@@ -21,33 +19,6 @@ struct Now(hal::timer::Timer);
 impl embedded_aoc::Timer<u64, 1, 1_000_000> for Now {
     fn now(&self) -> hal::timer::Instant {
         self.0.get_counter()
-    }
-}
-
-struct SerialWrapper<'a, B: UsbBus> {
-    usb_device: UsbDevice<'a, B>,
-    serial_port: SerialPort<'a, B>,
-}
-
-impl<'a, B: UsbBus> ErrorType for SerialWrapper<'a, B> {
-    type Error = <SerialPort<'a, B> as ErrorType>::Error;
-}
-
-impl<B: UsbBus> Write for SerialWrapper<'_, B> {
-    fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-        Ok(self.serial_port.write(buf)?)
-    }
-
-    fn flush(&mut self) -> Result<(), Self::Error> {
-        Ok(self.serial_port.flush()?)
-    }
-}
-
-impl<B: UsbBus> Read for SerialWrapper<'_, B> {
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-        while !self.usb_device.poll(&mut [&mut self.serial_port]) {}
-
-        Ok(self.serial_port.read(buf)?)
     }
 }
 
@@ -110,12 +81,11 @@ fn main() -> ! {
         .device_class(usbd_serial::USB_CLASS_CDC)
         .build();
 
-    let mut serial = SerialWrapper {
-        usb_device,
-        serial_port,
-    };
+    let serial = serial_port_splitter::Splitter::new(usb_device, serial_port);
+    
+    let (rx, tx) = serial.split();
 
-    embedded_aoc::run(&mut serial, &timer);
+    embedded_aoc::run((rx, tx), &timer);
 }
 
 #[unsafe(link_section = ".bi_entries")]

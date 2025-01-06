@@ -13,7 +13,7 @@ rp235x-hal = { version = "0.2.0", features = ["binary-info", "rt", "defmt", "cri
 usb-device = { version = "0.3.2" }
 usbd-serial = "0.2.2"
 embedded-aoc = { path = "../embedded-aoc", default-features = false, features = ["stack400k", "defmt"] }
-embedded-io = "0.6.1"
+serial-port-splitter = { path = "../serial-port-splitter" }
 
 [lints.clippy]
 pedantic = "deny"

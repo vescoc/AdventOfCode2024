@@ -3,12 +3,15 @@
 
 use defmt_rtt as _;
 
-use embedded_io::{ErrorType, Read, Write};
-
 use rp235x_hal as hal;
 
 use usb_device::{class_prelude::*, prelude::*};
 use usbd_serial::SerialPort;
+
+extern "C" {
+    static _stack_end: u32;
+    static _stack_start: u32;
+}
 
 #[unsafe(link_section = ".start_block")]
 #[used]
@@ -33,40 +36,8 @@ impl<D: hal::timer::TimerDevice> embedded_aoc::Timer<u64, 1, 1_000_000> for Now<
     }
 }
 
-struct SerialWrapper<'a, B: UsbBus> {
-    usb_device: UsbDevice<'a, B>,
-    serial_port: SerialPort<'a, B>,
-}
-
-impl<'a, B: UsbBus> ErrorType for SerialWrapper<'a, B> {
-    type Error = <SerialPort<'a, B> as ErrorType>::Error;
-}
-
-impl<B: UsbBus> Write for SerialWrapper<'_, B> {
-    fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-        Ok(self.serial_port.write(buf)?)
-    }
-
-    fn flush(&mut self) -> Result<(), Self::Error> {
-        Ok(self.serial_port.flush()?)
-    }
-}
-
-impl<B: UsbBus> Read for SerialWrapper<'_, B> {
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-        while !self.usb_device.poll(&mut [&mut self.serial_port]) {}
-
-        Ok(self.serial_port.read(buf)?)
-    }
-}
-
 #[hal::entry]
 fn main() -> ! {
-    extern "C" {
-        static _stack_end: u32;
-        static _stack_start: u32;
-    }
-    
     let mut pac = hal::pac::Peripherals::take().unwrap();
 
     let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);
@@ -110,12 +81,11 @@ fn main() -> ! {
         .device_class(usbd_serial::USB_CLASS_CDC)
         .build();
 
-    let mut serial = SerialWrapper {
-        usb_device,
-        serial_port,
-    };
+    let serial = serial_port_splitter::Splitter::new(usb_device, serial_port);
 
-    embedded_aoc::run(&mut serial, &timer);
+    let (rx, tx) = serial.split();
+
+    embedded_aoc::run((rx, tx), &timer);
 }
 
 #[unsafe(link_section = ".bi_entries")]

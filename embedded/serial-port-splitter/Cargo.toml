@@ -1,0 +1,9 @@
+[package]
+name = "serial-port-splitter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+usb-device = { version = "0.3.2" }
+usbd-serial = "0.2.2"
+embedded-io = "0.6.1"

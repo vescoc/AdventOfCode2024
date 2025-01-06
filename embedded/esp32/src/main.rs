@@ -43,7 +43,9 @@ fn main() -> ! {
                          peripherals.GPIO19) // tx (rx on USB - serial adapter)
         .unwrap();
     
+    let (rx, tx) = uart.split();
+
     let timer = Now;
 
-    embedded_aoc::run(uart, &timer);
+    embedded_aoc::run((rx, tx), &timer);
 }
