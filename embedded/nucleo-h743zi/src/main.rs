@@ -95,7 +95,7 @@ impl<const P1: char, const N1: u8, const P2: char, const N2: u8, const P3: char,
 #[cortex_m_rt::entry]
 #[allow(clippy::similar_names)]
 fn main() -> ! {
-    defmt::info!("STM32 NUCLEO-H743ZI");
+    defmt::info!("STM32 NUCLEO-H743ZI USB AoC 2024");
 
     let stack_low = &raw const _stack_end as u32;
     let stack_high = &raw const _stack_start as u32;

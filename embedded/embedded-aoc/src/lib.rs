@@ -9,7 +9,7 @@ use embedded_io::{Read, Write};
 
 use fugit::{Duration, Instant};
 
-use heapless::{String as HLString, Vec as HLVec};
+use heapless::String as HLString;
 
 #[cfg(feature = "defmt")]
 use defmt::{info, warn};
@@ -17,7 +17,7 @@ use defmt::{info, warn};
 #[cfg(feature = "log")]
 use log::{info, warn};
 
-type Vec<T> = HLVec<T, { 1024 * 32 }>;
+// type Vec<T> = HLVec<T, { 1024 * 25 }>;
 type PartResult = HLString<64>;
 
 const START_INPUT_TAG: &str = "START INPUT DAY: ";
@@ -354,20 +354,23 @@ pub fn run<const NOM: u32, const DENOM: u32>(
 where
     Instant<u64, NOM, DENOM>: ops::Sub<Output = Duration<u64, NOM, DENOM>>,
 {
-    let mut buf = [0u8; 64];
-    let mut buffer = Vec::new();
+    let mut buffer = [0; 25 * 1024];
     loop {
-        buffer.clear();
+        let mut length = 0;
         loop {
-            match rx.read(&mut buf) {
+            if length >= buffer.len() {
+                warn!("buffer overflow");
+                break;
+            }
+            
+            match rx.read(&mut buffer[length..]) {
                 Err(_) | Ok(0) => {}
                 Ok(count) => {
-                    if buffer.extend_from_slice(&buf[..count]).is_err() {
-                        warn!("buffer overflow");
-                        break;
-                    }
-
-                    if let Ok(input) = core::str::from_utf8(&buffer) {
+                    assert!(length + count <= buffer.len(), "invalid count");
+                    
+                    length += count;
+                    
+                    if let Ok(input) = core::str::from_utf8(&buffer[..length]) {
                         match (input.find(START_INPUT_TAG), input.find(END_INPUT_TAG)) {
                             (Some(start_position), Some(end_position)) => {
                                 let Ok(day) =
