@@ -380,7 +380,7 @@ where
 
                                     handler.unsupported_day();
 
-                                    write!(&mut tx, "unsupported day\r\n").unwrap();
+                                    write!(&mut tx, "unsupported day\r\n").ok();
 
                                     break;
                                 };
@@ -413,10 +413,10 @@ where
                                 handler.ended(day, elapsed, part_1.as_str(), part_2.as_str());
 
                                 info!("[{}] part 1: {}", day, part_1.as_str());
-                                write!(&mut tx, "[{day}] part 1: {part_1}\r\n").unwrap();
+                                write!(&mut tx, "[{day}] part 1: {part_1}\r\n").ok();
 
                                 info!("[{}] part 2: {}", day, part_2.as_str());
-                                write!(&mut tx, "[{day}] part 2: {part_2}\r\n").unwrap();
+                                write!(&mut tx, "[{day}] part 2: {part_2}\r\n").ok();
 
                                 info!(
                                     "[{}] elapsed: {}ms ({}us)",
@@ -430,7 +430,7 @@ where
                                     elapsed.to_millis(),
                                     elapsed.to_micros()
                                 )
-                                .unwrap();
+                                .ok();
 
                                 break;
                             }
@@ -439,7 +439,7 @@ where
 
                                 handler.invalid_input();
 
-                                write!(&mut tx, "invalid input\r\n").unwrap();
+                                write!(&mut tx, "invalid input\r\n").ok();
 
                                 break;
                             }
