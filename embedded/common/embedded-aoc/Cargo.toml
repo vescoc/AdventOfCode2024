@@ -147,31 +147,31 @@ heapless = "0.8.0"
 fugit = "0.3.7"
 embedded-io = "0.6.1"
 
-day01 = { path = "../../day01/rs", default-features = false, optional = true }
-day02 = { path = "../../day02/rs", default-features = false, optional = true }
-day03 = { path = "../../day03/rs", default-features = false, optional = true }
-day04 = { path = "../../day04/rs", default-features = false, optional = true }
-day05 = { path = "../../day05/rs", default-features = false, optional = true }
-day06 = { path = "../../day06/rs", default-features = false, optional = true }
-day07 = { path = "../../day07/rs", default-features = false, optional = true }
-day08 = { path = "../../day08/rs", default-features = false, optional = true }
-day09 = { path = "../../day09/rs", default-features = false, optional = true }
-day10 = { path = "../../day10/rs", default-features = false, optional = true }
-day11 = { path = "../../day11/rs", default-features = false, optional = true }
-day12 = { path = "../../day12/rs", default-features = false, optional = true }
-day13 = { path = "../../day13/rs", default-features = false, optional = true }
-day14 = { path = "../../day14/rs", default-features = false, optional = true }
-day15 = { path = "../../day15/rs", default-features = false, optional = true }
-day16 = { path = "../../day16/rs", default-features = false, optional = true }
-day17 = { path = "../../day17/rs", default-features = false, optional = true }
-day18 = { path = "../../day18/rs", default-features = false, optional = true }
-day19 = { path = "../../day19/rs", default-features = false, optional = true }
-day20 = { path = "../../day20/rs", default-features = false, optional = true }
-day21 = { path = "../../day21/rs", default-features = false, optional = true }
-day22 = { path = "../../day22/rs", default-features = false, optional = true }
-day23 = { path = "../../day23/rs", default-features = false, optional = true }
-day24 = { path = "../../day24/rs", default-features = false, optional = true }
-day25 = { path = "../../day25/rs", default-features = false, optional = true }
+day01 = { path = "../../../day01/rs", default-features = false, optional = true }
+day02 = { path = "../../../day02/rs", default-features = false, optional = true }
+day03 = { path = "../../../day03/rs", default-features = false, optional = true }
+day04 = { path = "../../../day04/rs", default-features = false, optional = true }
+day05 = { path = "../../../day05/rs", default-features = false, optional = true }
+day06 = { path = "../../../day06/rs", default-features = false, optional = true }
+day07 = { path = "../../../day07/rs", default-features = false, optional = true }
+day08 = { path = "../../../day08/rs", default-features = false, optional = true }
+day09 = { path = "../../../day09/rs", default-features = false, optional = true }
+day10 = { path = "../../../day10/rs", default-features = false, optional = true }
+day11 = { path = "../../../day11/rs", default-features = false, optional = true }
+day12 = { path = "../../../day12/rs", default-features = false, optional = true }
+day13 = { path = "../../../day13/rs", default-features = false, optional = true }
+day14 = { path = "../../../day14/rs", default-features = false, optional = true }
+day15 = { path = "../../../day15/rs", default-features = false, optional = true }
+day16 = { path = "../../../day16/rs", default-features = false, optional = true }
+day17 = { path = "../../../day17/rs", default-features = false, optional = true }
+day18 = { path = "../../../day18/rs", default-features = false, optional = true }
+day19 = { path = "../../../day19/rs", default-features = false, optional = true }
+day20 = { path = "../../../day20/rs", default-features = false, optional = true }
+day21 = { path = "../../../day21/rs", default-features = false, optional = true }
+day22 = { path = "../../../day22/rs", default-features = false, optional = true }
+day23 = { path = "../../../day23/rs", default-features = false, optional = true }
+day24 = { path = "../../../day24/rs", default-features = false, optional = true }
+day25 = { path = "../../../day25/rs", default-features = false, optional = true }
 
 [lints.clippy]
 pedantic = "deny"
@@ -180,3 +180,4 @@ large_stack_frames = "deny"
 [profile.release]
 debug = true
 codegen-units = 1
+lto = 'fat'

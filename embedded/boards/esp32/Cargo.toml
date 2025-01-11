@@ -9,7 +9,7 @@ esp-backtrace = { version = "0.14.2", features = ["esp32", "exception-handler", 
 esp-println = { version = "0.12.0", features = ["esp32", "log"] }
 log = "0.4.22"
 embedded-io = "0.6.1"
-embedded-aoc = { path = "../embedded-aoc", default-features = false, features = ["stack150k", "log"] }
+embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack150k", "log"] }
 fugit = "0.3.7"
 
 [lints.clippy]
@@ -19,6 +19,4 @@ large_stack_frames = "deny"
 [profile.release]
 debug = true
 codegen-units = 1
-# incremental = false
 lto = 'fat'
-# opt-level = 's'

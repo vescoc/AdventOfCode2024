@@ -12,8 +12,8 @@ defmt-rtt = "0.4.1"
 usb-device = "0.3.2"
 usbd-serial = "0.2.2"
 fugit = "0.3.7"
-embedded-aoc = { path = "../embedded-aoc", default-features = false, features = ["stack400k", "defmt"] }
-serial-port-splitter = { path = "../serial-port-splitter" }
+embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack400k", "defmt"] }
+serial-port-splitter = { path = "../../common/serial-port-splitter" }
 
 [lints.clippy]
 pedantic = "deny"
@@ -22,6 +22,4 @@ large_stack_frames = "deny"
 [profile.release]
 debug = true
 codegen-units = 1
-# incremental = false
 lto = 'fat'
-# opt-level = 's'
