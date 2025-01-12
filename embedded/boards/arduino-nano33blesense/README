@@ -1,0 +1,29 @@
+# Install arduino bossa
+
+[Arudino BOSSA with nrf52 support](https://github.com/arduino/BOSSA)
+
+# Using bossac for flashing
+Press rapid two times the reset button, blink orange led slowly
+
+## Building
+```bash
+cargo objcopy --release -- -O binary target/arduino-nano33blesense.bin
+```
+
+## Flashing
+```bash
+~/development/github/arduino-bossa/bin/bossac -i -d -p /dev/ttyACM1 -e -w -v target/arduino-nano33blesense.bin -R
+```
+
+# Serial UART
+| Pin | GPIO  | Mode |
+| :-- | :---- | :--: |
+| RX  | P1.10 | RX   |
+| TX  | P1.03 | TX   |
+
+# Leds
+| Led   | GPIO  | Description        |
+| :---- | :---- | :----------------- |
+| Green | P0_16 | Running            |
+| Red   | P0_24 | Invalid input data |
+| Blue  | P0_06 | Unsupported day    |

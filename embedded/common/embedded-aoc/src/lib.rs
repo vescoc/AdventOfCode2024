@@ -12,12 +12,11 @@ use fugit::{Duration, Instant};
 use heapless::String as HLString;
 
 #[cfg(feature = "defmt")]
-use defmt::{info, warn};
+use defmt::{info, warn, trace};
 
 #[cfg(feature = "log")]
-use log::{info, warn};
+use log::{info, warn, trace};
 
-// type Vec<T> = HLVec<T, { 1024 * 25 }>;
 type PartResult = HLString<64>;
 
 const START_INPUT_TAG: &str = "START INPUT DAY: ";
@@ -354,6 +353,8 @@ pub fn run<const NOM: u32, const DENOM: u32>(
 where
     Instant<u64, NOM, DENOM>: ops::Sub<Output = Duration<u64, NOM, DENOM>>,
 {
+    trace!("run");
+    
     let mut buffer = [0; 25 * 1024];
     loop {
         let mut length = 0;
@@ -362,11 +363,17 @@ where
                 warn!("buffer overflow");
                 break;
             }
-            
+
             match rx.read(&mut buffer[length..]) {
-                Err(_) | Ok(0) => {}
+                Err(err) => {
+                    #[cfg(feature = "log")]
+                    warn!("error reading: {err:?}");
+                }
+                Ok(0) => {
+                    trace!("reading 0 bytes");
+                }
                 Ok(count) => {
-                    assert!(length + count <= buffer.len(), "invalid count");
+                    debug_assert!(length + count <= buffer.len(), "invalid count");
                     
                     length += count;
                     
