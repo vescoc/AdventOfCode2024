@@ -31,13 +31,13 @@ fn core_panic(info: &core::panic::PanicInfo) -> ! {
     }
 }
 
+extern "C" {
+    static _stack_end: u32;
+    static _stack_start: u32;
+}
+
 #[hal::entry]
 fn main() -> ! {
-    extern "C" {
-        static _stack_end: u32;
-        static _stack_start: u32;
-    }
-    
     let mut pac = hal::pac::Peripherals::take().unwrap();
 
     let mut watchdog = hal::Watchdog::new(pac.WATCHDOG);

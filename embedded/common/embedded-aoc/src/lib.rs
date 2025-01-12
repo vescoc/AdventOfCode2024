@@ -365,9 +365,9 @@ where
             }
 
             match rx.read(&mut buffer[length..]) {
-                Err(err) => {
+                Err(_err) => {
                     #[cfg(feature = "log")]
-                    warn!("error reading: {err:?}");
+                    warn!("error reading: {_err:?}");
                 }
                 Ok(0) => {
                     trace!("reading 0 bytes");
