@@ -14,7 +14,7 @@ embedded-hal = "1.0.0"
 usb-device = "0.3.2"
 usbd-serial = "0.2.2"
 fugit = { version = "0.3.7", features = ["defmt"] }
-embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack150k", "defmt"] }
+embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack150k", "defmt", "blocking"] }
 serial-port-splitter = { path = "../../common/serial-port-splitter" }
 
 [lints.clippy]

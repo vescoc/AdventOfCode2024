@@ -12,7 +12,7 @@ log = "0.4.24"
 embedded-hal = "1.0.0"
 embedded-io = "0.6.1"
 fugit = { version = "0.3.7", features = ["defmt"] }
-embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack150k", "log"] }
+embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack150k", "log", "blocking"] }
 
 [lints.clippy]
 pedantic = "deny"

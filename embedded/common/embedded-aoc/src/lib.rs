@@ -1,25 +1,38 @@
 #![no_std]
 
+#[cfg(any(feature = "blocking", feature = "nonblocking"))]
 use core::fmt::Write as _;
 
+#[cfg(any(feature = "blocking", feature = "nonblocking"))]
 use core::fmt;
-use core::ops;
-
-use embedded_io::{Read, Write};
 
 use fugit::{Duration, Instant};
 
 use heapless::String as HLString;
 
-#[cfg(feature = "defmt")]
-use defmt::{info, warn, trace};
+#[cfg(all(feature = "defmt", any(feature = "blocking", feature = "nonblocking")))]
+use defmt::{info, trace, warn};
 
-#[cfg(feature = "log")]
-use log::{info, warn, trace};
+#[cfg(all(feature = "log", any(feature = "blocking", feature = "nonblocking")))]
+use log::{info, trace, warn};
 
+#[cfg(feature = "blocking")]
+mod blocking;
+#[cfg(feature = "blocking")]
+pub use blocking::run;
+
+#[cfg(feature = "nonblocking")]
+mod nonblocking;
+#[cfg(feature = "nonblocking")]
+pub use nonblocking::run;
+
+#[allow(dead_code)]
 type PartResult = HLString<64>;
 
+#[cfg(any(feature = "blocking", feature = "nonblocking"))]
 const START_INPUT_TAG: &str = "START INPUT DAY: ";
+
+#[cfg(any(feature = "blocking", feature = "nonblocking"))]
 const END_INPUT_TAG: &str = "END INPUT";
 
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
@@ -77,6 +90,7 @@ pub enum Day {
     Day25,
 }
 
+#[cfg(any(feature = "blocking", feature = "nonblocking"))]
 impl Day {
     fn to_string(result: &mut PartResult, value: impl fmt::Display) -> Result<(), fmt::Error> {
         write!(result, "{value}")
@@ -260,6 +274,7 @@ impl core::str::FromStr for Day {
     }
 }
 
+#[cfg(any(feature = "blocking", feature = "nonblocking"))]
 impl fmt::Display for Day {
     fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         let day = match self {
@@ -343,121 +358,3 @@ pub struct DummyHandler<T, const NOM: u32, const DENOM: u32> {
 }
 
 impl<T, const NOM: u32, const DENOM: u32> Handler<T, NOM, DENOM> for DummyHandler<T, NOM, DENOM> {}
-
-/// # Panics
-pub fn run<const NOM: u32, const DENOM: u32>(
-    (mut rx, mut tx): (impl Read, impl Write),
-    timer: &impl Timer<u64, NOM, DENOM>,
-    mut handler: impl Handler<u64, NOM, DENOM>,
-) -> !
-where
-    Instant<u64, NOM, DENOM>: ops::Sub<Output = Duration<u64, NOM, DENOM>>,
-{
-    trace!("run");
-    
-    let mut buffer = [0; 25 * 1024];
-    loop {
-        let mut length = 0;
-        loop {
-            if length >= buffer.len() {
-                warn!("buffer overflow");
-                break;
-            }
-
-            match rx.read(&mut buffer[length..]) {
-                Err(_err) => {
-                    #[cfg(feature = "log")]
-                    warn!("error reading: {_err:?}");
-                }
-                Ok(0) => {
-                    trace!("reading 0 bytes");
-                }
-                Ok(count) => {
-                    debug_assert!(length + count <= buffer.len(), "invalid count");
-                    
-                    length += count;
-                    
-                    if let Ok(input) = core::str::from_utf8(&buffer[..length]) {
-                        match (input.find(START_INPUT_TAG), input.find(END_INPUT_TAG)) {
-                            (Some(start_position), Some(end_position)) => {
-                                let Ok(day) =
-                                    input[start_position + START_INPUT_TAG.len()..].parse::<Day>()
-                                else {
-                                    warn!("unsupported day");
-
-                                    handler.unsupported_day();
-
-                                    write!(&mut tx, "unsupported day\r\n").ok();
-
-                                    break;
-                                };
-
-                                let input = input
-                                    [start_position + START_INPUT_TAG.len() + 2..end_position]
-                                    .trim();
-
-                                info!("[{}] start working on {}", day, day);
-
-                                let mut part_1 = PartResult::new();
-                                let mut part_2 = PartResult::new();
-
-                                let start = timer.now();
-
-                                handler.started(day, start);
-
-                                if day.solve_1(&mut part_1, input).is_err() {
-                                    warn!("part_1: buffer overflow");
-                                    break;
-                                }
-
-                                if day.solve_2(&mut part_2, input).is_err() {
-                                    warn!("part_2: buffer overflow");
-                                    break;
-                                }
-
-                                let elapsed = timer.now() - start;
-
-                                handler.ended(day, elapsed, part_1.as_str(), part_2.as_str());
-
-                                info!("[{}] part 1: {}", day, part_1.as_str());
-                                write!(&mut tx, "[{day}] part 1: {part_1}\r\n").ok();
-
-                                info!("[{}] part 2: {}", day, part_2.as_str());
-                                write!(&mut tx, "[{day}] part 2: {part_2}\r\n").ok();
-
-                                info!(
-                                    "[{}] elapsed: {}ms ({}us)",
-                                    day,
-                                    elapsed.to_millis(),
-                                    elapsed.to_micros()
-                                );
-                                write!(
-                                    &mut tx,
-                                    "[{day}] elapsed: {}ms ({}us)\r\n",
-                                    elapsed.to_millis(),
-                                    elapsed.to_micros()
-                                )
-                                .ok();
-
-                                break;
-                            }
-                            (None, Some(_)) => {
-                                warn!("invalid input");
-
-                                handler.invalid_input();
-
-                                write!(&mut tx, "invalid input\r\n").ok();
-
-                                break;
-                            }
-                            _ => {}
-                        }
-                    } else {
-                        warn!("invalid utf8 data");
-                        break;
-                    }
-                }
-            }
-        }
-    }
-}

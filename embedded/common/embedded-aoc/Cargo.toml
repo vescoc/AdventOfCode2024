@@ -6,10 +6,11 @@ authors = ["vescoc"]
 homepage = "urn:private"
 
 [features]
-default = ["stack1k", "defmt"]
-
 defmt = ["dep:defmt"]
 log = ["dep:log"]
+
+blocking = ["dep:embedded-io"]
+nonblocking = ["dep:embedded-io-async", "dep:static_cell"]
 
 stack400k = [
         "stack350k",
@@ -145,7 +146,9 @@ defmt = { version = "0.3.10", optional = true }
 log = { version = "0.4.22", optional = true }
 heapless = "0.8.0"
 fugit = "0.3.7"
-embedded-io = "0.6.1"
+embedded-io = { version = "0.6.1", optional = true }
+embedded-io-async = { version = "0.6.1", optional = true }
+static_cell = { version = "2.1.0", optional = true }
 
 day01 = { path = "../../../day01/rs", default-features = false, optional = true }
 day02 = { path = "../../../day02/rs", default-features = false, optional = true }
@@ -176,6 +179,8 @@ day25 = { path = "../../../day25/rs", default-features = false, optional = true 
 [lints.clippy]
 pedantic = "deny"
 large_stack_frames = "deny"
+large_stack_arrays = "deny"
+large_futures = "deny"
 
 [profile.release]
 debug = true

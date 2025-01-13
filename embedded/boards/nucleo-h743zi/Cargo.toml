@@ -12,7 +12,7 @@ defmt-rtt = "0.4.1"
 usb-device = "0.3.2"
 usbd-serial = "0.2.2"
 fugit = "0.3.7"
-embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack400k", "defmt"] }
+embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack400k", "defmt", "blocking"] }
 serial-port-splitter = { path = "../../common/serial-port-splitter" }
 
 [lints.clippy]

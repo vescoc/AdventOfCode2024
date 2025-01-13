@@ -10,7 +10,7 @@ esp-println = { version = "0.12.0", features = ["esp32c3", "log"] }
 log = "0.4.22"
 embedded-io = "0.6.1"
 fugit = "0.3.7"
-embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack250k", "log"] }
+embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack250k", "log", "blocking"] }
 
 [lints.clippy]
 pedantic = "deny"
