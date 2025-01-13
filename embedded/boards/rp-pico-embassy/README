@@ -1,0 +1,33 @@
+# Advent of Code 2024 on rp-pico embassy
+
+## OpenOCD
+Check adapter serial.
+```bash
+./src/openocd -s tcl -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "bindto 0.0.0.0" -c "adapter serial E6616407E3791429" -c "adapter speed 5000"
+```
+
+## GDB
+```raw
+file target/thumbv6m-none-eabi/release/aoc2024-rp-pico-embassy
+
+target extended-remote openocd:3333
+
+load
+
+monitor reset halt
+
+monitor rtt server start 8765 0
+monitor rtt setup 0x20000084 30 "SEGGER RTT"
+monitor rtt start
+```
+
+## Defmt
+```bash
+defmt-print -e target/thumbv6m-none-eabi/release/aoc2024-rp-pico-embassy tcp --host openocd --port 8765
+```
+
+### Device
+Check device.
+```bash
+stty -F /dev/ttyACM1 raw 115200
+```
