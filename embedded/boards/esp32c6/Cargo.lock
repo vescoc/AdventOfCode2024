@@ -845,7 +845,6 @@ name = "esp32c6"
 version = "0.1.0"
 dependencies = [
  "embedded-aoc",
- "embedded-io",
  "esp-backtrace",
  "esp-hal",
  "esp-println",

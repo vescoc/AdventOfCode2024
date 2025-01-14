@@ -1,19 +1,22 @@
 [package]
-name = "esp32c3"
+name = "esp32c3-embassy"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+embassy-executor = { version = "0.6.3", features = ["nightly"] }
 esp-hal = { version = "0.22.0", features = ["esp32c3"] }
+esp-hal-embassy = { version = "0.5.0", features = ["esp32c3"] }
 esp-backtrace = { version = "0.14.2", features = ["esp32c3", "exception-handler", "panic-handler", "println"] }
 esp-println = { version = "0.12.0", features = ["esp32c3", "log"] }
 log = "0.4.22"
 fugit = "0.3.7"
-embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack250k", "log", "blocking"] }
+embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack250k", "log", "nonblocking"] }
 
 [lints.clippy]
 pedantic = "deny"
 large_stack_frames = "deny"
+large_futures = "deny"
 
 [profile.release]
 debug = true

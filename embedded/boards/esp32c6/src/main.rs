@@ -16,20 +16,20 @@ impl embedded_aoc::Timer<u64, 1, 1_000_000> for Now {
     }
 }
 
+unsafe extern "C" {
+    static _stack_end: u32;
+    static _stack_start: u32;
+}
+
 #[esp_hal::entry]
 fn main() -> ! {
-    extern "C" {
-        static _stack_end: u32;
-        static _stack_start: u32;
-    }
-    
+    esp_println::logger::init_logger_from_env();
+
     let peripherals = esp_hal::init({
         let mut config = esp_hal::Config::default();
         config.cpu_clock = CpuClock::max();
         config
     });
-
-    esp_println::logger::init_logger_from_env();
 
     info!("ESP32C6 UART AoC 2024");
 

@@ -2,5 +2,5 @@
 channel = "nightly-2024-12-10"
 components = [ "rust-src", "rustfmt", "llvm-tools", "miri", "clippy" ]
 targets = [
-    "thumbv8m.main-none-eabihf",
+    "riscv32imac-unknown-none-elf"
 ]
