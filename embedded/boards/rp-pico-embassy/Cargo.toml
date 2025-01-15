@@ -14,7 +14,7 @@ embassy-executor = { version = "0.7.0", features = ["arch-cortex-m", "executor-t
 embassy-rp = { version = "0.3.0", features = ["defmt", "unstable-pac", "time-driver", "critical-section-impl", "rp2040", "binary-info"] }
 portable-atomic = { version = "1.10.0", features = ["critical-section"] }
 embassy-time = { version = "0.4.0" }
-embassy-usb = { version = "0.3.0" }
+embassy-usb = { version = "0.4.0" }
 fugit = { version = "0.3.7", features = ["defmt"] }
 static_cell = "2.1.0"
 embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack150k", "defmt", "nonblocking"] }

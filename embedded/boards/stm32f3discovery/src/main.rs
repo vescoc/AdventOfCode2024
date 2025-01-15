@@ -87,7 +87,7 @@ extern "C" {
 #[cortex_m_rt::entry]
 #[allow(clippy::similar_names)]
 fn main() -> ! {
-    defmt::info!("STM32 STM32F3DISCOVER USB AoC 2024");
+    defmt::info!("STM32 STM32F3DISCOVERY USB AoC 2024");
 
     let stack_low = &raw const _stack_end as u32;
     let stack_high = &raw const _stack_start as u32;
