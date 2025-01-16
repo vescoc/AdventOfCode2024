@@ -1,0 +1,9 @@
+# Configure =openocd=
+```bash
+./src/openocd -s tcl -f interface/jlink.cfg -c "transport select swd" -f target/nrf52.cfg -c "bindto 0.0.0.0"
+```
+
+# DEFMT
+```bash
+defmt-print -e target/thumbv7em-none-eabihf/release/nrf52840-dk-embassy tcp --host openocd --port 8765
+```
