@@ -9,5 +9,8 @@ rustflags = [
           "-C", "no-vectorize-loops",
 ]
 
+[unstable]
+build-std = ["core"]
+
 [env]
 DEFMT_LOG = "debug"
