@@ -7,12 +7,12 @@ Press rapid two times the reset button, blink orange led slowly
 
 ## Building
 ```bash
-cargo objcopy --release -- -O binary target/arduino-nano33blesense.bin
+cargo objcopy --release -- -O binary target/arduino-nano33blesense-embassy.bin
 ```
 
-## Flashing
+## Flashing (on openocd host)
 ```bash
-~/development/github/arduino-bossa/bin/bossac -i -d -p /dev/ttyACM1 -e -w -v target/arduino-nano33blesense.bin -R
+~/development/github/arduino-bossa/bin/bossac -i -d -p /dev/ttyACM1 -e -w -v target/arduino-nano33blesense-embassy.bin -R
 ```
 
 # GPIO
