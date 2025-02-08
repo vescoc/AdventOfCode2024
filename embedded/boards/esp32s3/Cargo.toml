@@ -1,0 +1,21 @@
+[package]
+name = "esp32s3"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+esp-backtrace = { version = "0.15.0", features = ["esp32s3", "exception-handler", "panic-handler", "println"] }
+esp-hal = { version = "0.23.1", features = ["esp32s3"] }
+esp-println = { version = "0.13.0", features = ["esp32s3", "log"] }
+fugit = "0.3.7"
+log = "0.4.25"
+embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack300k", "log", "blocking"] }
+
+[lints.clippy]
+pedantic = "deny"
+large_stack_frames = "deny"
+
+[profile.release]
+debug = true
+codegen-units = 1
+lto = 'fat'
