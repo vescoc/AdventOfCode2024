@@ -8,10 +8,11 @@ rustflags = [
 
 [target.xtensa-esp32-none-elf]
 runner = "espflash flash --monitor -p /dev/ttyUSB0"
-linker = "/home/pi/.espressif/tools/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc"
+linker = "/home/pi/.rustup/toolchains/esp/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32-elf-gcc"
 
 [unstable]
 build-std = ["core"]
 
 [env]
 ESP_LOG = "INFO"
+LIBCLANG_PATH = "/home/pi/.rustup/toolchains/esp/xtensa-esp32-elf-clang/esp-19.1.2_20250225/esp-clang/lib"

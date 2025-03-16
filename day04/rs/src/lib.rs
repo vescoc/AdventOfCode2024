@@ -101,7 +101,7 @@ pub fn solve_2(input: &str) -> usize {
                 .enumerate()
                 .take(width - 1)
                 .skip(1)
-                .filter(move |(c, &tile)| {
+                .filter(move |&(c, &tile)| {
                     tile == b'A'
                         && matches!(
                             (

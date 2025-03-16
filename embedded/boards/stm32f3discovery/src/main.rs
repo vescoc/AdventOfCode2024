@@ -79,7 +79,7 @@ where
     }
 }
 
-extern "C" {
+unsafe extern "C" {
     static _stack_end: u32;
     static _stack_start: u32;
 }

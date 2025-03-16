@@ -1,6 +1,6 @@
 #![no_std]
 
-pub fn split<'d, D: embassy_usb::driver::Driver<'d>>(class: embassy_usb::class::cdc_acm::CdcAcmClass<'d, D>) -> (impl embedded_io_async::Write + use<'d, D>, impl embedded_io_async::Read + use<'d, D>) {
+pub fn split<'d, D: embassy_usb::driver::Driver<'d>>(class: embassy_usb::class::cdc_acm::CdcAcmClass<'d, D>) -> (impl embedded_io_async::Write, impl embedded_io_async::Read) {
     let (sender, receiver) = class.split();
     (Tx(sender), Rx(receiver))
 }

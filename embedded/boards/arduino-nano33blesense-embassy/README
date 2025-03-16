@@ -1,6 +1,6 @@
 # Install arduino bossa
 
-[Arudino BOSSA with nrf52 support](https://github.com/arduino/BOSSA)
+[Arduino BOSSA with nrf52 support](https://github.com/arduino/BOSSA)
 
 # Using bossac for flashing
 Press rapid two times the reset button, blink orange led slowly

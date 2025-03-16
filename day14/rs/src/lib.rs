@@ -44,7 +44,7 @@ fn parse(data: &str) -> (i32, i32) {
 }
 
 /// # Panics
-pub fn robots(input: &str) -> impl Iterator<Item = Robot> + use<'_> {
+pub fn robots(input: &str) -> impl Iterator<Item = Robot> {
     input.lines().map(|line| {
         let mut parts = line.split_whitespace().map(parse);
         let (px, py) = parts.next().unwrap();

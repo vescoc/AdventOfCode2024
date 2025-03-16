@@ -8,7 +8,7 @@ use rp235x_hal as hal;
 use usb_device::{class_prelude::*, prelude::*};
 use usbd_serial::SerialPort;
 
-extern "C" {
+unsafe extern "C" {
     static _stack_end: u32;
     static _stack_start: u32;
 }

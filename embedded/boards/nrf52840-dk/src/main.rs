@@ -17,7 +17,7 @@ use embedded_hal::digital::OutputPin;
 type Instant = fugit::Instant<u64, 1, 1_000_000>;
 type Duration = fugit::Duration<u64, 1, 1_000_000>;
 
-extern "C" {
+unsafe extern "C" {
     static _stack_end: u32;
     static _stack_start: u32;
 }

@@ -1,2 +1,2 @@
-stack-size-threshold = 2000
+stack-size-threshold = 3000
 future-size-threshold = 1000

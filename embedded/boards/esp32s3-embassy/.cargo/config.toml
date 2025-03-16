@@ -15,4 +15,4 @@ build-std = ["core"]
 
 [env]
 ESP_LOG = "INFO"
-LIBCLANG_PATH = "/home/pi/.rustup/toolchains/esp/xtensa-esp32-elf-clang/esp-18.1.2_20240912/esp-clang/lib"
+LIBCLANG_PATH = "/home/pi/.rustup/toolchains/esp/xtensa-esp32-elf-clang/esp-19.1.2_20250225/esp-clang/lib"

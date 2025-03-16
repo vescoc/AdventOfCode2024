@@ -19,7 +19,7 @@ bind_interrupts!( struct Irqs {
     UARTE1 => uarte::InterruptHandler<peripherals::UARTE1>;
 });
 
-extern "C" {
+unsafe extern "C" {
     static _stack_end: u32;
     static _stack_start: u32;
 }

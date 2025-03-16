@@ -66,10 +66,13 @@ impl<W: embedded_io_async::Write> fmt::Write for Wrapper<W> {
     fn write_str(&mut self, value: &str) -> Result<(), fmt::Error> {
         let mut buf = value.as_bytes();
         while !buf.is_empty() {
-            if let Ok(count) = embassy_futures::block_on(self.0.write(value.as_bytes())) {
-                buf = &buf[count..];
-            } else {
-                return Err(fmt::Error);
+            match embassy_futures::block_on(self.0.write(value.as_bytes())) {
+                Ok(count) => {
+                    buf = &buf[count..];
+                }
+                _ => {
+                    return Err(fmt::Error);
+                }
             }
         }
         Ok(())

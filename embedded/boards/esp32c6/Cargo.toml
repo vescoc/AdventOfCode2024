@@ -1,14 +1,15 @@
 [package]
 name = "esp32c6"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-esp-hal = { version = "0.22.0", features = ["esp32c6"] }
-esp-backtrace = { version = "0.14.2", features = ["esp32c6", "exception-handler", "panic-handler", "println"] }
-esp-println = { version = "0.12.0", features = ["esp32c6", "log"] }
+esp-hal = { version = "1.0.0-beta.0", features = ["esp32c6", "unstable"] }
+esp-backtrace = { version = "0.15.1", features = ["esp32c6", "exception-handler", "panic-handler", "println"] }
+esp-println = { version = "0.13.1", features = ["esp32c6", "log"] }
 log = "0.4.22"
 fugit = "0.3.7"
+
 embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack350k", "log", "blocking"] }
 
 [lints.clippy]

@@ -49,7 +49,7 @@ impl core::ops::Deref for Antennas {
 }
 
 #[allow(clippy::cast_possible_wrap)]
-fn calculate_antinode((height, width): Point, a: &Point, b: &Point) -> impl Iterator<Item = Point> {
+fn calculate_antinode((height, width): Point, a: &Point, b: &Point) -> impl Iterator<Item = Point> + use<> {
     let (dr, dc) = (b.0 as isize - a.0 as isize, b.1 as isize - a.1 as isize);
     let r = match (a.0.checked_add_signed(-dr), a.1.checked_add_signed(-dc)) {
         (Some(r), Some(c)) if r < height && c < width => Some((r, c)),
@@ -63,7 +63,7 @@ fn calculate_antinodes(
     (height, width): Point,
     a: &Point,
     b: &Point,
-) -> impl Iterator<Item = Point> {
+) -> impl Iterator<Item = Point> + use<> {
     let (a, b) = (*a, *b);
 
     let (dr, dc) = (b.0 as isize - a.0 as isize, b.1 as isize - a.1 as isize);
