@@ -1,0 +1,23 @@
+[package]
+name = "esp32s2-embassy"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+esp-hal = { version = "1.0.0-beta.0", features = ["esp32s2", "unstable"] }
+embassy-executor = { version = "0.7.0", features = ["nightly"] }
+esp-hal-embassy = { version = "0.7.0", features = ["esp32s2"] }
+log = "0.4.22"
+fugit = "0.3.7"
+
+embedded-aoc = { path = "../../common/embedded-aoc", default-features = false, features = ["stack150k", "log", "nonblocking"] }
+critical-section = "1.2.0"
+
+[lints.clippy]
+pedantic = "deny"
+large_stack_frames = "deny"
+
+[profile.release]
+debug = true
+codegen-units = 1
+lto = 'fat'

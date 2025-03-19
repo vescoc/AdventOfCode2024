@@ -1,0 +1,18 @@
+[build]
+target = "xtensa-esp32s2-none-elf"
+
+rustflags = [
+    "-C", "link-arg=-Tlinkall.x",
+    "-C", "link-arg=-nostartfiles",
+]
+
+[target.xtensa-esp32s2-none-elf]
+runner = "espflash flash --monitor --no-stub -b no-reset -c esp32s2 -p /dev/ttyACM0"
+linker = "/home/pi/.rustup/toolchains/esp/xtensa-esp-elf/esp-14.2.0_20240906/xtensa-esp-elf/bin/xtensa-esp32s2-elf-gcc"
+
+[unstable]
+build-std = ["core"]
+
+[env]
+ESP_LOG = "INFO"
+LIBCLANG_PATH = "/home/pi/.rustup/toolchains/esp/xtensa-esp32-elf-clang/esp-19.1.2_20250225/esp-clang/lib"
